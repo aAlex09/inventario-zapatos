@@ -1,13 +1,93 @@
-import React from "react";
+import React, { useState } from "react";
+import { login } from "../api/auth";
+import "../App.css";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    
+    try {
+      await login(email, password);
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setError("Credenciales inválidas. Por favor intente de nuevo.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Bienvenido al Sistema salchichon</h1>
-      <p>Por favor, inicia sesión</p>
-      <input type="text" placeholder="Correo" /><br /><br />
-      <input type="password" placeholder="Contraseña" /><br /><br />
-      <button>Entrar</button>
+    <div className="login-page dark-mode">
+      <div className="login-wrapper">
+        <div className="login-container">
+          <div className="login-header">
+            <div className="login-logo">
+              <img 
+                src="https://cdn3.iconfinder.com/data/icons/other-icons/48/nike_shoes-1024.png"
+                alt="Logo Inventario de Zapatos"
+              />
+            </div>
+            <h1>Inventario de Zapatos</h1>
+            <p>Accede a tu cuenta</p>
+          </div>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="email">Correo Electrónico</label>
+              <input 
+                type="email" 
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="correo@ejemplo.com" 
+                required 
+              />
+            </div>
+            
+            <div className="input-group">
+              <label htmlFor="password">Contraseña</label>
+              <input 
+                type="password" 
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingrese su contraseña" 
+                required 
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className="login-button"
+              disabled={loading}
+            >
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+            </button>
+          </form>
+          
+          <div className="login-footer">
+            <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+          </div>
+        </div>
+        
+        <div className="login-image-container">
+          <img 
+            src="https://i.gifer.com/4KDr.gif"
+            alt="Zapatos"
+            className="side-image"
+          />
+        </div>
+      </div>
     </div>
   );
 }
