@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Agregar esta importación
 import { login } from "../api/auth";
 import "../App.css";
 
@@ -76,7 +77,7 @@ export default function Login() {
           </form>
           
           <div className="login-footer">
-            <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+            <Link to="/forgot-password" className="forgot-password">¿Olvidaste tu contraseña?</Link>
           </div>
         </div>
         
