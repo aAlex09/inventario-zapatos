@@ -7,3 +7,4 @@ passlib[bcrypt]
 python-dotenv
 python-jose[cryptography]
 alembic
+fastapi-cors
