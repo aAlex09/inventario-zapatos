@@ -91,18 +91,18 @@ def send_password_reset_email(email: str, reset_token: str, background_tasks: Ba
     # Ejecutar en segundo plano
     background_tasks.add_task(send_email)
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse) 
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.email == request.email).first()
     if not user or not pwd_context.verify(request.password, user.contraseña_login):
         raise HTTPException(status_code=401, detail="usuario o contraseña incorrectos")
 
-    token_data = {"sub": user.email, "role": user.tipo_usuario_rol}
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+    token_data = {"sub": user.email, "role": user.tipo_usuario_rol} # Datos del token JWT
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM) # Generar token JWT
 
     return {"access_token": token, "token_type": "bearer"}
 
-@router.post("/request-password-reset")
+@router.post("/request-password-reset") # Ruta para solicitar restablecimiento de contraseña
 def request_password_reset(request: PasswordResetRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     # Verificar si el usuario existe
     user = db.query(Usuario).filter(Usuario.email == request.email).first()
@@ -122,7 +122,7 @@ def request_password_reset(request: PasswordResetRequest, background_tasks: Back
     
     return {"message": "Si su correo está registrado, recibirá un enlace para restablecer su contraseña"}
 
-@router.get("/validate-reset-token/{token}")
+@router.get("/validate-reset-token/{token}") #ruta para validar el token de restablecimiento de contraseña
 def validate_reset_token(token: str):
     if token not in password_reset_tokens:
         raise HTTPException(status_code=404, detail="Token no válido")
@@ -135,7 +135,7 @@ def validate_reset_token(token: str):
     
     return {"valid": True}
 
-@router.post("/reset-password")
+@router.post("/reset-password") # Ruta para restablecer la contraseña
 def reset_password_with_token(request: PasswordReset, db: Session = Depends(get_db)):
     if request.token not in password_reset_tokens:
         raise HTTPException(status_code=404, detail="Token no válido")

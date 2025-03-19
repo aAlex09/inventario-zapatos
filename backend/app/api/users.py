@@ -9,15 +9,15 @@ from app.api.auth import get_db
 
 router = APIRouter()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") #se define la encriptacion con bcrypt
 
-# Get all users
+# Get para todos los usuarios
 @router.get("/users", response_model=List[UserResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(Usuario).all()
     return users
 
-# Get single user
+# Get para un solo usuario de la lista
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
@@ -43,7 +43,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     if not role:
         raise HTTPException(status_code=400, detail="El rol especificado no existe")
     
-    # Create new user
+    # Crea nuevo usuario en la base de datos
     hashed_password = pwd_context.hash(user.contraseña_login)
     new_user = Usuario(
         nombre=user.nombre,
@@ -64,24 +64,24 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 # Update user
 @router.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
-    # Find user
+    # encontrar al usuario en la base de datos
     db_user = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    # Check if updating email and it already exists for another user
+    # Chequea si el email ya esta registrado
     if user_update.email and user_update.email != db_user.email:
         existing_user = db.query(Usuario).filter(Usuario.email == user_update.email).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado")
     
-    # Check if updating cedula and it already exists for another user
+    # chequea si la cedula esta registrada
     if user_update.cedula and user_update.cedula != db_user.cedula:
         existing_user = db.query(Usuario).filter(Usuario.cedula == user_update.cedula).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="La cédula ya está registrada")
     
-    # Check if updating role and it exists
+    #checkea si el rol especificado existe
     if user_update.tipo_usuario_rol:
         role = db.query(Rol).filter(Rol.id_rol == user_update.tipo_usuario_rol).first()
         if not role:
@@ -89,7 +89,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     
     # Update user data
     for key, value in user_update.dict(exclude_unset=True).items():
-        if key == "contraseña_login" and value:  # Only update password if provided
+        if key == "contraseña_login" and value:  # solo actualiza la contraseña si el usuario lo ingresa
             value = pwd_context.hash(value)
         if value is not None:  # Only update fields that are provided
             setattr(db_user, key, value)

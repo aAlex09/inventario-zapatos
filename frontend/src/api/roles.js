@@ -12,7 +12,7 @@ const getConfig = () => {
   };
 };
 
-// Get all roles
+// Get para todos los roles 
 export const getRoles = async () => {
   try {
     const response = await axios.get(`${API_URL}/roles`, getConfig());

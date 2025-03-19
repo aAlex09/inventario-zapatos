@@ -21,17 +21,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create tables if they don't exist
+# crea las tablas si no existen
 Base.metadata.create_all(bind=engine)
 
-# Initialize database with roles and admin user
+# Inicializa la base de datos
 try:
     init_db()
     logger.info("Database initialized successfully")
 except Exception as e:
     logger.error(f"Error initializing database: {str(e)}")
 
-@app.get("/")
+@app.get("/") # Ruta raíz
 def read_root():
     return {"message": "API del Inventario de Zapatos corriendo"}
 

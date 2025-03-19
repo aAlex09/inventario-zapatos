@@ -42,7 +42,7 @@ export const getUserById = async (id) => {
   }
 };
 
-// Create a new user
+// Crear un nuevo user
 export const createUser = async (userData) => {
   try {
     const response = await axios.post(`${API_URL}/users`, userData, getConfig());
@@ -56,7 +56,7 @@ export const createUser = async (userData) => {
   }
 };
 
-// Update a user
+// acualizar un user
 export const updateUser = async (id, userData) => {
   try {
     const response = await axios.put(`${API_URL}/users/${id}`, userData, getConfig());
@@ -70,7 +70,7 @@ export const updateUser = async (id, userData) => {
   }
 };
 
-// Delete a user
+// borrar un user
 export const deleteUser = async (id) => {
   try {
     await axios.delete(`${API_URL}/users/${id}`, getConfig());
