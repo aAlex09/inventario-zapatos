@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom"; // Add this import
 import "../App.css";
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // Add this line
 
     useEffect(() => {
         // Get token from localStorage
@@ -19,20 +21,25 @@ export default function Dashboard() {
                 console.error("Error decoding token:", error);
                 // Handle invalid token - redirect to login
                 localStorage.removeItem("token");
-                window.location.href = "/";
+                navigate("/"); // Changed from window.location.href
             }
         } else {
             // No token found, redirect to login
-            window.location.href = "/";
+            navigate("/"); // Changed from window.location.href
         }
         
         setLoading(false);
-    }, []);
+    }, [navigate]); // Add navigate to dependency array
 
     // Function to handle logout
     const handleLogout = () => {
         localStorage.removeItem("token");
-        window.location.href = "/";
+        navigate("/"); // Changed from window.location.href
+    };
+
+    // Function to navigate to different pages based on menu item
+    const handleMenuClick = (path) => {
+        navigate(path);
     };
 
     // Different menu options based on role
@@ -45,7 +52,10 @@ export default function Dashboard() {
                     <div className="menu-section">
                         <h3>Menú de Administrador</h3>
                         <div className="dashboard-menu">
-                            <div className="menu-item">
+                            <div 
+                                className="menu-item"
+                                onClick={() => handleMenuClick("/users")} // Add this onClick handler
+                            >
                                 <div className="menu-icon">👤</div>
                                 <span>Usuarios</span>
                             </div>
