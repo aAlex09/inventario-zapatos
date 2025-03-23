@@ -2,17 +2,43 @@
  * Set up a handler to clear authentication on tab/window close
  */
 export const setupAutoLogout = () => {
-  // Handler for when user tries to close tab/window
-  const handleBeforeUnload = () => {
-    // Clear token and authentication data
-    localStorage.removeItem("token");
+  // Variable para determinar si estamos navegando internamente
+  let isNavigatingWithin = false;
+  
+  // Configurar un listener para la navegación interna
+  const handleBeforeNavigate = () => {
+    isNavigatingWithin = true;
+    // Resetear el estado después de un breve período
+    setTimeout(() => {
+      isNavigatingWithin = false;
+    }, 500);
   };
 
-  // Add event listener for tab/window close
-  window.addEventListener('beforeunload', handleBeforeUnload);
+  // Handler para cuando el usuario intenta cerrar pestaña/ventana
+  const handleBeforeUnload = () => {
+    // Solo limpiar si no estamos navegando internamente
+    if (!isNavigatingWithin) {
+      localStorage.removeItem("token");
+    }
+  };
 
-  // Return function to remove listener (for cleanup)
+  // Agregar event listeners
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  
+  // Añadir event listener para detectar navegación interna
+  document.body.addEventListener('click', (e) => {
+    // Verificar si se hizo clic en un enlace o botón que podría navegar
+    if (e.target.tagName === 'A' || 
+        e.target.tagName === 'BUTTON' || 
+        e.target.closest('a') || 
+        e.target.closest('button')) {
+      handleBeforeNavigate();
+    }
+  });
+
+  // Retornar función para eliminar los listeners (limpieza)
   return () => {
     window.removeEventListener('beforeunload', handleBeforeUnload);
+    document.body.removeEventListener('click', handleBeforeNavigate);
   };
 };
