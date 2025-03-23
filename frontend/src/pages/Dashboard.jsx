@@ -166,26 +166,16 @@ export default function Dashboard() {
                                 <span className="stat-value">120</span>
                             </div>
                         </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">🛒</div>
-                            <div className="stat-details">
-                                <span className="stat-title">Ventas hoy</span>
-                                <span className="stat-value">8</span>
-                            </div>
-                        </div>
+                        
                         <div className="stat-card">
                             <div className="stat-icon">⚠️</div>
                             <div className="stat-details">
                                 <span className="stat-title">Stock bajo</span>
                                 <span className="stat-value">5</span>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">💰</div>
-                            <div className="stat-details">
-                                <span className="stat-title">Ingresos</span>
-                                <span className="stat-value">$1,250</span>
-                            </div>
+                      
+                        
+                           
                         </div>
                     </div>
                 </div>

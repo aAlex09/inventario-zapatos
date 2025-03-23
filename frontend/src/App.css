@@ -30,6 +30,7 @@ html, body, #root {
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  min-height: 600px;
 }
 
 .login-container {
@@ -143,18 +144,34 @@ html, body, #root {
 .login-footer {
   margin-top: 25px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .forgot-password {
-  color: #6e8efb;
-  font-size: 14px;
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #6e8efb, #a777e3);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
   text-decoration: none;
-  transition: color 0.2s;
+  margin-top: 15px;
 }
 
 .forgot-password:hover {
-  color: #5d7df7;
-  text-decoration: underline;
+  background: linear-gradient(to right, #5d7df7, #9866db);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(110, 142, 251, 0.3);
+  text-decoration: none;
+  color: white;
 }
 
 .error-message {
@@ -246,11 +263,13 @@ html, body, #root {
 }
 
 .dark-mode .forgot-password {
-  color: #6764ff;
+  background: linear-gradient(to right, #6764ff, #9564ff);
+  color: white;
 }
 
 .dark-mode .forgot-password:hover {
-  color: #9564ff;
+  background: linear-gradient(to right, #5857db, #8957da);
+  color: white;
 }
 
 .dark-mode .error-message {
@@ -259,7 +278,6 @@ html, body, #root {
   border: 1px solid rgba(255, 77, 77, 0.3);
 }
 
-/* Add these styles at the end of your existing CSS file */
 
 /* Dashboard styles */
 .dashboard-container {
@@ -816,4 +834,25 @@ html, body, #root {
 
 .dark-mode .stat-value {
   color: #e3e3e3;
+}
+
+/* Si quieres un botón secundario con un estilo diferente, puedes usar esta clase */
+.secondary-button {
+  background: transparent !important;
+  color: #6e8efb !important;
+  border: 1px solid #6e8efb !important;
+  margin-top: 10px;
+}
+
+.dark-mode .secondary-button {
+  color: #6764ff !important;
+  border: 1px solid #6764ff !important;
+}
+
+.secondary-button:hover {
+  background: rgba(110, 142, 251, 0.1) !important;
+}
+
+.dark-mode .secondary-button:hover {
+  background: rgba(103, 100, 255, 0.1) !important;
 }

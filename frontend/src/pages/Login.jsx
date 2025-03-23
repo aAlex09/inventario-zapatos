@@ -77,7 +77,9 @@ export default function Login() {
           </form>
           
           <div className="login-footer">
-            <Link to="/forgot-password" className="forgot-password">¿Olvidaste tu contraseña?</Link>
+            <Link to="/forgot-password" className="forgot-password secondary-button">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
         </div>
         
