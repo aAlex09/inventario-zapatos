@@ -25,7 +25,7 @@ html, body, #root {
   display: flex;
   width: 100%;
   max-width: 1000px;
-  height: 80vh; /* Altura del 80% de la ventana */
+  height: 90vh; /* Altura del 80% de la ventana */
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
