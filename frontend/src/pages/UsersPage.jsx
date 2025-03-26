@@ -150,18 +150,29 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (cedula) => {
-    if (!window.confirm("¿Está seguro que desea eliminar este usuario?")) {
-      return;
-    }
-    
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  
+  const handleOpenDeleteModal = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+  
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+  };
+  
+  const handleConfirmDelete = async () => {
     try {
-      await deleteUser(cedula);
-      setUsers(users.filter(user => user.cedula !== cedula));
+      await deleteUser(userToDelete.cedula);
+      setUsers(users.filter(user => user.cedula !== userToDelete.cedula));
       setError("");
     } catch (err) {
       console.error("Error deleting user:", err);
       setError("Error eliminando usuario. Intente nuevamente.");
+    } finally {
+      handleCloseDeleteModal();
     }
   };
 
@@ -231,7 +242,7 @@ export default function UsersPage() {
                         </button>
                         <button 
                           className="btn-delete"
-                          onClick={() => handleDeleteUser(user.cedula)}
+                          onClick={() => handleOpenDeleteModal(user)}
                         >
                           🗑️
                         </button>
@@ -243,7 +254,7 @@ export default function UsersPage() {
             </table>
           </div>
 
-          {/* User Modal Form */}
+          {/* User Modal Form para actualizar*/}
           {showModal && (
             <div className="modal-overlay">
               <div className="modal-content">
@@ -355,6 +366,33 @@ export default function UsersPage() {
               </div>
             </div>
           )}
+
+          {showDeleteModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3>¿Eliminar Usuario?</h3>
+                  <button className="close-btn" onClick={handleCloseDeleteModal}>×</button>
+                </div>
+
+                <div className="modal-body">
+                  <p>
+                    ¿Estás seguro de que deseas eliminar al usuario <strong>{userToDelete?.nombre}</strong> con cédula <strong>{userToDelete?.cedula}</strong>?
+                  </p>
+                </div>
+
+                <div className="form-buttons">
+                  <button className="btn-cancel" onClick={handleCloseDeleteModal}>
+                    Cancelar
+                  </button>
+                  <button className="btn-submit btn-danger" onClick={handleConfirmDelete}>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
