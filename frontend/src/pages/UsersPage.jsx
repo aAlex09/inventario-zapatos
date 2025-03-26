@@ -130,10 +130,10 @@ export default function UsersPage() {
         const newUser = await createUser(formData);
         updatedUsers = [...users, newUser];
       } else {
-        // Edit mode
-        const updatedUser = await updateUser(currentUser.id_usuario, formData);
+        // Edit mode - usando cedula como identificador
+        const updatedUser = await updateUser(currentUser.cedula, formData);
         updatedUsers = users.map(user => 
-          user.id_usuario === currentUser.id_usuario ? updatedUser : user
+          user.cedula === currentUser.cedula ? updatedUser : user
         );
       }
       
@@ -150,14 +150,14 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (cedula) => {
     if (!window.confirm("¿Está seguro que desea eliminar este usuario?")) {
       return;
     }
     
     try {
-      await deleteUser(userId);
-      setUsers(users.filter(user => user.id_usuario !== userId));
+      await deleteUser(cedula);
+      setUsers(users.filter(user => user.cedula !== cedula));
       setError("");
     } catch (err) {
       console.error("Error deleting user:", err);
@@ -169,6 +169,9 @@ export default function UsersPage() {
     const role = roles.find(role => role.id_rol === roleId);
     return role ? role.nombre : "Desconocido";
   };
+
+  // Los campos del formulario de edición deben deshabilitar la cédula
+  const isCedulaDisabled = modalMode === "edit";
 
   if (loading) {
     return (
@@ -216,7 +219,7 @@ export default function UsersPage() {
                   </tr>
                 ) : (
                   users.map(user => (
-                    <tr key={user.id_usuario}>
+                    <tr key={user.cedula}>
                       <td>{user.nombre}</td>
                       <td>{user.cedula}</td>
                       <td>{user.email}</td>
@@ -231,7 +234,7 @@ export default function UsersPage() {
                         </button>
                         <button 
                           className="btn-delete"
-                          onClick={() => handleDeleteUser(user.id_usuario)}
+                          onClick={() => handleDeleteUser(user.cedula)}
                         >
                           🗑️
                         </button>
@@ -272,8 +275,12 @@ export default function UsersPage() {
                       name="cedula"
                       value={formData.cedula}
                       onChange={handleInputChange}
+                      disabled={isCedulaDisabled} // Deshabilitar la cédula en modo edición
                       required
                     />
+                    {isCedulaDisabled && (
+                      <small className="form-hint">La cédula no se puede editar</small>
+                    )}
                   </div>
                   
                   <div className="form-group">

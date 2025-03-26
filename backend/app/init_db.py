@@ -23,22 +23,22 @@ def init_db():
                 db.add(new_role)
                 db.flush()  # Flush to get the ID if needed
         
-        # Check if admin user already exists (by email or cedula)
+        # Check if admin user already exists
         admin = db.query(Usuario).filter(
             sa.or_(
-                Usuario.email == "admin@example.com",
+                Usuario.email == "admin@sistema.com",
                 Usuario.cedula == "1234567890"
             )
         ).first()
         
         if not admin:
             admin_user = Usuario(
+                cedula="1234567890",  # Aquí cedula es la PK
                 nombre="Administrador",
-                cedula="1234567890",
                 telefono="0987654321",
-                email="admin@example.com",
+                email="admin@sistema.com",
                 direccion_empleado="Dirección Administrador",
-                contraseña_login=pwd_context.hash("admin"),
+                contraseña_login=pwd_context.hash("admin123"),
                 tipo_usuario_rol=1  # Admin role
             )
             db.add(admin_user)
