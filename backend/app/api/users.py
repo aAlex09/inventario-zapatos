@@ -18,9 +18,9 @@ def get_users(db: Session = Depends(get_db)):
     return users
 
 # Get para un solo usuario de la lista
-@router.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+@router.get("/users/{cedula}", response_model=UserResponse)
+def get_user(cedula: str, db: Session = Depends(get_db)):
+    user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
@@ -61,11 +61,9 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     
     return new_user
 
-# Update user
-@router.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
-    # encontrar al usuario en la base de datos
-    db_user = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+@router.put("/users/{cedula}", response_model=UserResponse)
+def update_user(cedula: str, user_update: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
@@ -100,15 +98,14 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     return db_user
 
 # Delete user
-@router.delete("/users/{user_id}", status_code=204)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+@router.delete("/users/{cedula}", status_code=204)
+def delete_user(cedula: str, db: Session = Depends(get_db)):
+    db_user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
     db.delete(db_user)
     db.commit()
-    
     return {"status": "Usuario eliminado exitosamente"}
 
 # Get all roles

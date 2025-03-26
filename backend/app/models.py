@@ -16,7 +16,7 @@ class Rol(Base):
 # Tabla de Usuarios
 class Usuario(Base):
     __tablename__ = "usuarios"
-    
+        
     cedula = Column(String, primary_key=True, index=True)  # Cédula como PK
     nombre = Column(String)
     telefono = Column(String)

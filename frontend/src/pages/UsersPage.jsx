@@ -150,14 +150,14 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (cedula) => {
     if (!window.confirm("¿Está seguro que desea eliminar este usuario?")) {
       return;
     }
     
     try {
-      await deleteUser(userId);
-      setUsers(users.filter(user => user.id_usuario !== userId));
+      await deleteUser(cedula);
+      setUsers(users.filter(user => user.cedula !== cedula));
       setError("");
     } catch (err) {
       console.error("Error deleting user:", err);
@@ -231,7 +231,7 @@ export default function UsersPage() {
                         </button>
                         <button 
                           className="btn-delete"
-                          onClick={() => handleDeleteUser(user.id_usuario)}
+                          onClick={() => handleDeleteUser(user.cedula)}
                         >
                           🗑️
                         </button>

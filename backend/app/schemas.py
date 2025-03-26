@@ -35,9 +35,9 @@ class UserUpdate(BaseModel):
     tipo_usuario_rol: Optional[int] = None
 
 class UserResponse(UserBase):
-    id_usuario: int
+    cedula: str  # Cambiar id_usuario por cedula
     
-    model_config = ConfigDict(from_attributes=True)  #actualizacion para los ficcionarios de configuracion
+    model_config = ConfigDict(from_attributes=True)  # Actualización para los diccionarios de configuración
 
 # Login schemas
 class LoginRequest(BaseModel):

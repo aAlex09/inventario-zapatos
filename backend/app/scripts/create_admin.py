@@ -35,7 +35,7 @@ def create_admin_user():
         
         new_admin = Usuario(
             nombre="Administrador del Sistema",
-            cedula="1234567890",
+            cedula="12345678888890",
             telefono="3001234567",
             email="admin@sistema.com",
             direccion_empleado="Oficina Principal",
