@@ -289,14 +289,3 @@ form {
 .dark-mode .btn-submit:hover {
   background-color: #5857db;
 }
-
-.form-hint {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  margin-top: 5px;
-}
-
-.dark-mode .form-hint {
-  color: #777;
-}

@@ -23,21 +23,21 @@ class UserBase(BaseModel):
     tipo_usuario_rol: int
 
 class UserCreate(UserBase):
-    contraseña_login: str
+    contraseña_login: str # revisar contraseña al iniciar sesion
 
 class UserUpdate(BaseModel):
     nombre: Optional[str] = None
-    # No incluimos cedula aquí, porque es la PK y no se debe actualizar
+    cedula: Optional[str] = None
     telefono: Optional[str] = None
     email: Optional[EmailStr] = None
     direccion_empleado: Optional[str] = None
-    contraseña_login: Optional[str] = None
+    contraseña_login: Optional[str] = None  # Optional
     tipo_usuario_rol: Optional[int] = None
 
 class UserResponse(UserBase):
-    # Cambiamos id_usuario por cedula
+    id_usuario: int
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)  #actualizacion para los ficcionarios de configuracion
 
 # Login schemas
 class LoginRequest(BaseModel):

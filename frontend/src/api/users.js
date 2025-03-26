@@ -19,6 +19,7 @@ export const getUsers = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
+    // Si hay un error de autorización, limpiar el token y redirigir al login
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       localStorage.removeItem('token');
       window.location.href = '/';
@@ -27,10 +28,10 @@ export const getUsers = async () => {
   }
 };
 
-// Get a single user by cedula
-export const getUserByCedula = async (cedula) => {
+// Get a single user by ID
+export const getUserById = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/users/${cedula}`, getConfig());
+    const response = await axios.get(`${API_URL}/users/${id}`, getConfig());
     return response.data;
   } catch (error) {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
@@ -55,10 +56,10 @@ export const createUser = async (userData) => {
   }
 };
 
-// acualizar un user (usando cedula)
-export const updateUser = async (cedula, userData) => {
+// acualizar un user
+export const updateUser = async (id, userData) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${cedula}`, userData, getConfig());
+    const response = await axios.put(`${API_URL}/users/${id}`, userData, getConfig());
     return response.data;
   } catch (error) {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
@@ -69,10 +70,10 @@ export const updateUser = async (cedula, userData) => {
   }
 };
 
-// borrar un user (usando cedula)
-export const deleteUser = async (cedula) => {
+// borrar un user
+export const deleteUser = async (id) => {
   try {
-    await axios.delete(`${API_URL}/users/${cedula}`, getConfig());
+    await axios.delete(`${API_URL}/users/${id}`, getConfig());
     return true;
   } catch (error) {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
