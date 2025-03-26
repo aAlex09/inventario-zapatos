@@ -131,9 +131,9 @@ export default function UsersPage() {
         updatedUsers = [...users, newUser];
       } else {
         // Edit mode
-        const updatedUser = await updateUser(currentUser.id_usuario, formData);
+        const updatedUser = await updateUser(currentUser.cedula, formData);
         updatedUsers = users.map(user => 
-          user.id_usuario === currentUser.id_usuario ? updatedUser : user
+          user.cedula === currentUser.cedula? updatedUser : user
         );
       }
       

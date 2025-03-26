@@ -8,7 +8,7 @@ class Rol(Base):
     
     id_rol = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, index=True)
-    
+    descripcion = Column(String, nullable=True)
     # Relación con Usuarios
     usuarios = relationship("Usuario", back_populates="rol")
 
