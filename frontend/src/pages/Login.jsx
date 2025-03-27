@@ -16,8 +16,12 @@ export default function Login() {
     setError("");
     
     try {
-      await login(email, password);
-      // Usar navigate en lugar de window.location.href
+      const response = await login(email, password);
+      
+      // Store cedula in localStorage for later use
+      localStorage.setItem("userCedula", response.cedula);
+      
+      // Navigate to dashboard
       navigate("/dashboard");
     } catch (err) {
       setError("Credenciales inválidas. Por favor intente de nuevo.");

@@ -4,6 +4,7 @@ from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.database import engine, Base
 from app.init_db import init_db  # Import the initialization function
+from app.api.funcionalidades import router as funcionalidades_router
 import logging
 
 # Set up logging
@@ -39,3 +40,4 @@ def read_root():
 # Include routers
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
+app.include_router(funcionalidades_router, prefix="/api")

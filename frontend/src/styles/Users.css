@@ -17,6 +17,10 @@
   color: white;
 }
 
+.users-header h1 {
+  margin: 0;
+}
+
 .btn-primary {
   background-color: #6e8efb;
   color: white;
@@ -64,7 +68,7 @@
 }
 
 .users-table tr:hover {
-  background-color: #f5f5f5;
+  background-color: #5f5e5e;
 }
 
 .no-users {
@@ -288,4 +292,15 @@ form {
 
 .dark-mode .btn-submit:hover {
   background-color: #5857db;
+}
+
+.error {
+  border-color: #d32f2f !important;
+  background-color: rgba(211, 47, 47, 0.05);
+}
+
+.error-text {
+  color: #d32f2f;
+  font-size: 0.75rem;
+  margin-top: 4px;
 }

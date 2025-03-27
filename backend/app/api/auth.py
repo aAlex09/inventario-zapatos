@@ -97,10 +97,20 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not user or not pwd_context.verify(request.password, user.contraseña_login):
         raise HTTPException(status_code=401, detail="usuario o contraseña incorrectos")
 
-    token_data = {"sub": user.email, "role": user.tipo_usuario_rol} # Datos del token JWT
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM) # Generar token JWT
+    # Include cedula in the token data
+    token_data = {
+        "sub": user.email, 
+        "role": user.tipo_usuario_rol,
+        "cedula": user.cedula  # Add this line to include cedula in the token
+    }
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
-    return {"access_token": token, "token_type": "bearer"}
+    # Return cedula in the response
+    return {
+        "access_token": token, 
+        "token_type": "bearer",
+        "cedula": user.cedula  # Add this line to include cedula in the response
+    }
 
 @router.post("/request-password-reset") # Ruta para solicitar restablecimiento de contraseña
 def request_password_reset(request: PasswordResetRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):

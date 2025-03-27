@@ -1,400 +1,207 @@
-import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
-import { getUsers, createUser, updateUser, deleteUser } from "../api/users";
-import { getRoles } from "../api/roles";
-import Navbar from "../components/Navbar";
-import "../styles/Users.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import ManageUserFunctionalities from '../components/ManageUserFunctionalities';
+import UserForm from '../components/UserForm'; // We'll create this component
+import { getUsers, createUser, deleteUser } from '../api/users'; // Using your existing API functions
+import { getRoles } from '../api/roles'; // Using your existing API function
+import Navbar from '../components/Navbar';
+import { jwtDecode } from 'jwt-decode';
+import '../styles/usersPage.css';
 
-export default function UsersPage() {
+const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("create"); // "create" or "edit"
-  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showFunctionalitiesModal, setShowFunctionalitiesModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [userData, setUserData] = useState(null);
-  const navigate = useNavigate();
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    nombre: "",
-    cedula: "",
-    telefono: "",
-    email: "",
-    direccion_empleado: "",
-    contraseña_login: "",
-    tipo_usuario_rol: 0
-  });
-  
-  // Verificar el token al cargar la página
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    
-    if (token) {
-      try {
-        // Decode the JWT token to get user info
-        const decoded = jwtDecode(token);
-        setUserData(decoded);
-        
-        // Verificar si es administrador
-        if (decoded.role !== 1) {
-          // Si no es administrador, redirigir al dashboard
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        localStorage.removeItem("token");
-        navigate("/");
-      }
-    } else {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  // Load users and roles on component mount
-  useEffect(() => {
-    if (!userData) return; // No cargar datos si no hay usuario
-    
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [usersData, rolesData] = await Promise.all([
-          getUsers(),
-          getRoles()
-        ]);
-        
-        setUsers(usersData);
-        setRoles(rolesData);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Error cargando datos. Intente nuevamente más tarde.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [userData]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "tipo_usuario_rol" ? parseInt(value) : value
-    });
-  };
-
-  const handleOpenCreateModal = () => {
-    setFormData({
-      nombre: "",
-      cedula: "",
-      telefono: "",
-      email: "",
-      direccion_empleado: "",
-      contraseña_login: "",
-      tipo_usuario_rol: roles.length > 0 ? roles[0].id_rol : 0
-    });
-    setModalMode("create");
-    setShowModal(true);
-  };
-
-  const handleOpenEditModal = (user) => {
-    setCurrentUser(user);
-    setFormData({
-      nombre: user.nombre,
-      cedula: user.cedula,
-      telefono: user.telefono,
-      email: user.email,
-      direccion_empleado: user.direccion_empleado,
-      contraseña_login: "", // Don't show the password
-      tipo_usuario_rol: user.tipo_usuario_rol
-    });
-    setModalMode("edit");
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setCurrentUser(null);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      let updatedUsers;
-      
-      if (modalMode === "create") {
-        const newUser = await createUser(formData);
-        updatedUsers = [...users, newUser];
-      } else {
-        // Edit mode
-        const updatedUser = await updateUser(currentUser.cedula, formData);
-        updatedUsers = users.map(user => 
-          user.cedula === currentUser.cedula? updatedUser : user
-        );
-      }
-      
-      setUsers(updatedUsers);
-      handleCloseModal();
-      setError("");
-    } catch (err) {
-      console.error("Error:", err);
-      setError(
-        modalMode === "create" 
-          ? "Error creando usuario. Intente nuevamente." 
-          : "Error actualizando usuario. Intente nuevamente."
-      );
-    }
-  };
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   
-  const handleOpenDeleteModal = (user) => {
+  useEffect(() => {
+    fetchUsers();
+    fetchRoles();
+    
+    // Get user data from token
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserData(decoded);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await getUsers();
+      setUsers(data);
+      setError("");
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Error al cargar los usuarios");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchRoles = async () => {
+    try {
+      const data = await getRoles();
+      setRoles(data);
+    } catch (err) {
+      console.error("Error fetching roles:", err);
+    }
+  };
+
+  const handleManageFunctionalities = (user) => {
+    setSelectedUser(user);
+    setShowFunctionalitiesModal(true);
+  };
+
+  const handleCreateUser = async (userData) => {
+    try {
+      await createUser(userData);
+      fetchUsers(); // Refresh user list
+      setShowCreateModal(false);
+      setError("");
+    } catch (err) {
+      console.error("Error creating user:", err);
+      setError(err.response?.data?.detail || "Error al crear el usuario");
+    }
+  };
+  
+  const handleDeleteClick = (user) => {
     setUserToDelete(user);
     setShowDeleteModal(true);
   };
   
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
-    setUserToDelete(null);
-  };
-  
-  const handleConfirmDelete = async () => {
+  const confirmDelete = async () => {
     try {
       await deleteUser(userToDelete.cedula);
-      setUsers(users.filter(user => user.cedula !== userToDelete.cedula));
-      setError("");
+      fetchUsers(); // Refresh user list
+      setShowDeleteModal(false);
+      setUserToDelete(null);
     } catch (err) {
       console.error("Error deleting user:", err);
-      setError("Error eliminando usuario. Intente nuevamente.");
-    } finally {
-      handleCloseDeleteModal();
+      setError(err.response?.data?.detail || "Error al eliminar el usuario");
     }
   };
 
-  const getRoleName = (roleId) => {
-    const role = roles.find(role => role.id_rol === roleId);
-    return role ? role.nombre : "Desconocido";
+  const closeModal = () => {
+    setSelectedUser(null);
+    setShowFunctionalitiesModal(false);
+    setShowCreateModal(false);
+    setShowDeleteModal(false);
+    setUserToDelete(null);
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar userData={userData} />
-        <div className="loading">Cargando usuarios...</div>
-      </>
-    );
-  }
-
+  if (loading) return <div className="loading">Cargando usuarios...</div>;
+  
   return (
-    <div className="dashboard-container">
+    <div className="users-page">
       <Navbar userData={userData} />
       
-      <div className="dashboard-content">
-        <div className="users-container">
-          <div className="users-header">
-            <h2>Gestión de Usuarios</h2>
-            <button 
-              className="btn btn-primary" 
-              onClick={handleOpenCreateModal}
-            >
-              Nuevo Usuario
-            </button>
-          </div>
-
-          {error && <div className="users-error">{error}</div>}
-
-          <div className="users-table-container">
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Cédula</th>
-                  <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Rol</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="no-users">No hay usuarios registrados</td>
-                  </tr>
-                ) : (
-                  users.map(user => (
-                    <tr key={user.id_usuario}>
-                      <td>{user.nombre}</td>
-                      <td>{user.cedula}</td>
-                      <td>{user.email}</td>
-                      <td>{user.telefono}</td>
-                      <td>{getRoleName(user.tipo_usuario_rol)}</td>
-                      <td className="actions-cell">
-                        <button 
-                          className="btn-edit"
-                          onClick={() => handleOpenEditModal(user)}
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          className="btn-delete"
-                          onClick={() => handleOpenDeleteModal(user)}
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* User Modal Form para actualizar*/}
-          {showModal && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h3>{modalMode === "create" ? "Crear Nuevo Usuario" : "Editar Usuario"}</h3>
-                  <button className="close-btn" onClick={handleCloseModal}>×</button>
-                </div>
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="nombre">Nombre Completo</label>
-                    <input
-                      type="text"
-                      id="nombre"
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="cedula">Cédula</label>
-                    <input
-                      type="text"
-                      id="cedula"
-                      name="cedula"
-                      value={formData.cedula}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="telefono">Teléfono</label>
-                    <input
-                      type="text"
-                      id="telefono"
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="direccion_empleado">Dirección</label>
-                    <input
-                      type="text"
-                      id="direccion_empleado"
-                      name="direccion_empleado"
-                      value={formData.direccion_empleado}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="contraseña_login">
-                      {modalMode === "create" ? "Contraseña" : "Nueva Contraseña (Dejar en blanco para mantener)"}
-                    </label>
-                    <input
-                      type="password"
-                      id="contraseña_login"
-                      name="contraseña_login"
-                      value={formData.contraseña_login}
-                      onChange={handleInputChange}
-                      required={modalMode === "create"}
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="tipo_usuario_rol">Rol</label>
-                    <select
-                      id="tipo_usuario_rol"
-                      name="tipo_usuario_rol"
-                      value={formData.tipo_usuario_rol}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      {roles.map(role => (
-                        <option key={role.id_rol} value={role.id_rol}>
-                          {role.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="form-buttons">
-                    <button type="button" className="btn-cancel" onClick={handleCloseModal}>
-                      Cancelar
-                    </button>
-                    <button type="submit" className="btn-submit">
-                      {modalMode === "create" ? "Crear Usuario" : "Guardar Cambios"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {showDeleteModal && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h3>¿Eliminar Usuario?</h3>
-                  <button className="close-btn" onClick={handleCloseDeleteModal}>×</button>
-                </div>
-
-                <div className="modal-body">
-                  <p>
-                    ¿Estás seguro de que deseas eliminar al usuario <strong>{userToDelete?.nombre}</strong> con cédula <strong>{userToDelete?.cedula}</strong>?
-                  </p>
-                </div>
-
-                <div className="form-buttons">
-                  <button className="btn-cancel" onClick={handleCloseDeleteModal}>
-                    Cancelar
+      <div className="users-header">
+        <h1>Gestión de Usuarios</h1>
+        <button 
+          className="btn-primary" 
+          onClick={() => setShowCreateModal(true)}
+        >
+          Crear Nuevo Usuario
+        </button>
+      </div>
+      
+      {error && <div className="error-message">{error}</div>}
+      
+      {/* Tabla de usuarios */}
+      <div className="users-table-container">
+        <table className="users-table">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.cedula}>
+                <td>{user.cedula}</td>
+                <td>{user.nombre}</td>
+                <td>{user.email}</td>
+                <td>{user.telefono}</td>
+                <td>{user.rol?.nombre || 'Sin rol'}</td>
+                <td className="action-buttons">
+                  <button 
+                    className="btn-functionalities" 
+                    onClick={() => handleManageFunctionalities(user)}
+                  >
+                    Funcionalidades
                   </button>
-                  <button className="btn-submit btn-danger" onClick={handleConfirmDelete}>
+                  <button 
+                    className="btn-delete" 
+                    onClick={() => handleDeleteClick(user)}
+                  >
                     Eliminar
                   </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Modal de gestión de funcionalidades */}
+      {showFunctionalitiesModal && selectedUser && (
+        <div className="modal-backdrop">
+          <ManageUserFunctionalities 
+            user={selectedUser} 
+            onClose={closeModal} 
+          />
+        </div>
+      )}
+      
+      {/* Modal para crear usuario */}
+      {showCreateModal && (
+        <div className="modal-backdrop">
+          <UserForm 
+            onSubmit={handleCreateUser} 
+            onCancel={closeModal}
+            roles={roles}
+          />
+        </div>
+      )}
+      
+      {/* Modal para confirmar eliminación */}
+      {showDeleteModal && userToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Confirmar Eliminación</h3>
+              <button className="close-btn" onClick={closeModal}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <p>¿Está seguro que desea eliminar al usuario {userToDelete.nombre}?</p>
+              <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div className="form-buttons">
+              <button className="btn-cancel" onClick={closeModal}>Cancelar</button>
+              <button className="btn-submit" onClick={confirmDelete}>Eliminar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default UsersPage;
