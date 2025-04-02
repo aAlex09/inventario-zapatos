@@ -185,6 +185,9 @@
   flex: 1;
   color: #e3e3e3;
   background-color: transparent;
+  max-width: 1400px; /* Añadir un ancho máximo más amplio */
+  margin: 0 auto; /* Centrar el contenido */
+  width: 95%; /* Usar la mayoría del espacio disponible */
 }
 
 .inventory-header {
@@ -406,15 +409,22 @@
 .products-table th {
   background-color: #30363d;
   color: #e3e3e3;
-  padding: 12px 15px;
+  padding: 16px 15px; /* Aumentar el padding vertical */
   text-align: left;
   border-bottom: 1px solid #444;
 }
 
 .products-table td {
-  padding: 12px 15px;
+  padding: 16px 15px; /* Aumentar el padding vertical */
   border-bottom: 1px solid #30363d;
   color: #e3e3e3;
+  vertical-align: middle; /* Centrar verticalmente el contenido */
+}
+
+/* Añadir un poco más de espacio entre columnas */
+.products-table th:not(:last-child),
+.products-table td:not(:last-child) {
+  padding-right: 20px;
 }
 
 /* Cambia el color del hover para que sea coherente con el tema oscuro */
@@ -459,34 +469,62 @@
   box-shadow: 0 3px 8px rgba(244, 67, 54, 0.3);
 }
 
-/* Estilos para las imágenes de productos */
+/* Estilos para las imágenes de productos - Versión mejorada */
 .product-image {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: #30363d;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative; /* Importante para el posicionamiento del hover */
 }
 
+/* Nuevo enfoque para el hover con posicionamiento absoluto */
 .product-image:hover {
-  transform: scale(1.8);
-  z-index: 5;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1); /* Escala menor en la celda */
+  z-index: 10;
+}
+
+/* Añadir un contenedor para la celda de imagen */
+.image-cell {
+  position: relative;
+  width: 90px;
+  padding: 5px !important;
+}
+
+/* Añadir tooltip de imagen ampliada al hacer hover */
+.image-cell:hover::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  top: 50%;
+  left: 100px; /* Posicionar a la derecha de la celda */
+  transform: translateY(-50%);
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 2px solid #444;
+  display: none; /* Se activará con JavaScript */
 }
 
 /* Estilo para cuando no hay imagen */
 .no-image {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #30363d;
-  border-radius: 4px;
+  border-radius: 6px;
   color: #b2b2b2;
-  font-size: 20px;
+  font-size: 28px;
 }
 
 /* Modal preview de imagen */
@@ -518,4 +556,16 @@
 
 .form-group.image-input label {
   margin-bottom: 8px;
+}
+
+/* Mejorar la visualización en pantallas más grandes */
+@media (min-width: 1200px) {
+  .products-table-container {
+    overflow-x: auto;
+    padding: 10px 0;
+  }
+  
+  .products-table {
+    min-width: 1100px;
+  }
 }

@@ -235,6 +235,76 @@ const InventarioPage = ({ userData }) => {
     setImagePreview(null);
   };
 
+  // Añade este código en la parte superior del componente
+  useEffect(() => {
+    // Función para manejar el hover de imágenes
+    const setupImageHover = () => {
+      const images = document.querySelectorAll('.product-image');
+      
+      images.forEach(img => {
+        // Crear un elemento div para la imagen ampliada
+        const zoomView = document.createElement('div');
+        zoomView.className = 'image-zoom-view';
+        zoomView.style = `
+          position: fixed;
+          display: none;
+          width: 300px;
+          height: 300px;
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-color: #222831;
+          border-radius: 8px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+          z-index: 1000;
+          border: 2px solid #444;
+          pointer-events: none;
+        `;
+        document.body.appendChild(zoomView);
+        
+        // Evento mouseenter - mostrar zoom
+        img.addEventListener('mouseenter', (e) => {
+          zoomView.style.backgroundImage = `url(${img.src})`;
+          zoomView.style.display = 'block';
+        });
+        
+        // Evento mousemove - mover zoom
+        img.addEventListener('mousemove', (e) => {
+          // Posicionar cerca del cursor pero evitando que salga de la pantalla
+          const x = e.clientX + 20;
+          const y = e.clientY - 150;
+          
+          // Ajustar si se sale de los bordes
+          const rightEdge = window.innerWidth - 320;
+          const bottomEdge = window.innerHeight - 320;
+          
+          const adjustedX = x > rightEdge ? rightEdge : x;
+          const adjustedY = y < 20 ? 20 : (y > bottomEdge ? bottomEdge : y);
+          
+          zoomView.style.left = `${adjustedX}px`;
+          zoomView.style.top = `${adjustedY}px`;
+        });
+        
+        // Evento mouseleave - ocultar zoom
+        img.addEventListener('mouseleave', () => {
+          zoomView.style.display = 'none';
+        });
+      });
+    };
+    
+    // Ejecutar después de que se carguen los productos
+    if (productos.length > 0 && !loading) {
+      // Pequeño retraso para asegurar que el DOM está listo
+      setTimeout(setupImageHover, 300);
+    }
+    
+    // Limpieza al desmontar
+    return () => {
+      const zoomViews = document.querySelectorAll('.image-zoom-view');
+      zoomViews.forEach(view => view.remove());
+    };
+  }, [productos, loading]);
+
   if (loading && productos.length === 0) return (
     <div className="page-container">
       <Navbar userData={userData} />
@@ -343,7 +413,7 @@ const InventarioPage = ({ userData }) => {
               ) : (
                 productos.map(producto => (
                   <tr key={producto.id_producto}>
-                    <td>
+                    <td className="image-cell">
                       {producto.imagen_url ? (
                         <img 
                           src={producto.imagen_url} 
@@ -351,7 +421,7 @@ const InventarioPage = ({ userData }) => {
                           className="product-image"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/50?text=Error";
+                            e.target.src = "https://via.placeholder.com/80?text=Error";
                           }}
                         />
                       ) : (
