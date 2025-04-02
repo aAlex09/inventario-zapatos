@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import UsersPage from "./pages/UsersPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import InventarioPage from "./pages/Inventario"; // Add this import
 import PrivateRoute from "./routes/PrivateRoute";
 import { setupAutoLogout } from "./utils/sessionManager";
 
@@ -34,6 +35,11 @@ function App() {
         <Route path="/users" element={
           <PrivateRoute>
             <UsersPage />
+          </PrivateRoute>
+        } />
+        <Route path="/inventario" element={
+          <PrivateRoute>
+            <InventarioPage />
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />

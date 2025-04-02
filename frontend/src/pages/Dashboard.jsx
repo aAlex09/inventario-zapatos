@@ -61,7 +61,7 @@ const Dashboard = () => {
           <nav className="dashboard-nav">
             <button onClick={() => handleNavigation('/dashboard')}>Inicio</button>
             <button onClick={() => handleNavigation('/users')}>Usuarios</button>
-            <button onClick={() => handleNavigation('/inventory')}>Inventario</button>
+            <button onClick={() => handleNavigation('/inventario')}>Inventario</button>
             <button onClick={() => handleNavigation('/sales')}>Ventas</button>
             <button onClick={() => handleNavigation('/reports')}>Reportes</button>
             <button onClick={() => handleNavigation('/settings')}>Configuración</button>

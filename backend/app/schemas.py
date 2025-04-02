@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, List
+from datetime import datetime
 
 # Role schemas
 class RoleBase(BaseModel):
@@ -82,4 +83,42 @@ class UsuarioFuncionalidadUpdate(BaseModel):
     estado: bool
 
 class UsuarioFuncionalidadResponse(UsuarioFuncionalidadBase):
+    model_config = ConfigDict(from_attributes=True)
+
+# Producto schemas
+class ProductoBase(BaseModel):
+    codigo: str
+    nombre: str
+    descripcion: Optional[str] = None
+    precio_compra: float
+    precio_venta: float
+    stock: int
+    talla: str
+    color: str
+    marca: str
+    categoria: str
+    imagen_url: Optional[str] = None
+
+class ProductoCreate(ProductoBase):
+    pass
+
+class ProductoUpdate(BaseModel):
+    codigo: Optional[str] = None
+    nombre: Optional[str] = None
+    descripcion: Optional[str] = None
+    precio_compra: Optional[float] = None
+    precio_venta: Optional[float] = None
+    stock: Optional[int] = None
+    talla: Optional[str] = None
+    color: Optional[str] = None
+    marca: Optional[str] = None
+    categoria: Optional[str] = None
+    imagen_url: Optional[str] = None
+    activo: Optional[bool] = None
+
+class ProductoResponse(ProductoBase):
+    id_producto: int
+    fecha_ingreso: datetime
+    activo: bool
+    
     model_config = ConfigDict(from_attributes=True)

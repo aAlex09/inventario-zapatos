@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Float, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from app.database import Base
 
 # Tabla de Roles
@@ -52,3 +53,22 @@ class UsuarioFuncionalidad(Base):
     # Relaciones
     usuario = relationship("Usuario", back_populates="funcionalidades")
     funcionalidad = relationship("Funcionalidad", back_populates="usuarios")
+
+
+class Producto(Base):
+    __tablename__ = "productos"
+    
+    id_producto = Column(Integer, primary_key=True, index=True)
+    codigo = Column(String, unique=True, index=True)
+    nombre = Column(String, index=True)
+    descripcion = Column(String, nullable=True)
+    precio_compra = Column(Float)
+    precio_venta = Column(Float)
+    stock = Column(Integer)
+    talla = Column(String)
+    color = Column(String)
+    marca = Column(String)
+    categoria = Column(String)
+    imagen_url = Column(String, nullable=True)
+    fecha_ingreso = Column(DateTime, default=func.now())
+    activo = Column(Boolean, default=True)

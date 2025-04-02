@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Navbar({ userData }) {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export default function Navbar({ userData }) {
 
       <div className="user-section">
         <span className="user-email">{userData?.sub}</span>
+        <Link to="/inventario" className="nav-link">Inventario</Link>
         <button className="logout-btn" onClick={handleLogout}>
           Cerrar Sesión
         </button>
