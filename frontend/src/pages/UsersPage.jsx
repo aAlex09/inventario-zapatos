@@ -3,12 +3,25 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { getUsers, createUser, updateUser, deleteUser } from "../api/users";
 import { getRoles } from "../api/roles";
+import { getFuncionalidades, getUserFuncionalidades } from "../api/funcionalidades";
 import Navbar from "../components/Navbar";
 import "../styles/Users.css";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
+const getConfig = () => ({
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }
+});
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [funcionalidades, setFuncionalidades] = useState([]);
+  const [selectedFuncionalidades, setSelectedFuncionalidades] = useState([]);
+  const [userFuncionalidades, setUserFuncionalidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -55,21 +68,27 @@ export default function UsersPage() {
 
   // Load users and roles on component mount
   useEffect(() => {
-    if (!userData) return; // No cargar datos si no hay usuario
+    if (!userData) return;
     
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [usersData, rolesData] = await Promise.all([
+        const [usersData, rolesData, funcionesData] = await Promise.all([
           getUsers(),
-          getRoles()
+          getRoles(),
+          getFuncionalidades()
         ]);
+        
+        console.log("Usuarios cargados:", usersData);
+        console.log("Roles cargados:", rolesData);
+        console.log("Funcionalidades cargadas:", funcionesData);
         
         setUsers(usersData);
         setRoles(rolesData);
+        setFuncionalidades(funcionesData);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Error cargando datos. Intente nuevamente más tarde.");
+        setError("Error cargando datos. Por favor, intente nuevamente.");
       } finally {
         setLoading(false);
       }
@@ -100,17 +119,30 @@ export default function UsersPage() {
     setShowModal(true);
   };
 
-  const handleOpenEditModal = (user) => {
+  const handleOpenEditModal = async (user) => {
     setCurrentUser(user);
     setFormData({
-      nombre: user.nombre,
-      cedula: user.cedula,
-      telefono: user.telefono,
-      email: user.email,
-      direccion_empleado: user.direccion_empleado,
-      contraseña_login: "", // Don't show the password
-      tipo_usuario_rol: user.tipo_usuario_rol
+        ...user,
+        contraseña_login: "",
+        tipo_usuario_rol: user.tipo_usuario_rol
     });
+    
+    try {
+        // Cargar funcionalidades del usuario
+        const userFuncs = await getUserFuncionalidades(user.cedula);
+        console.log("Funcionalidades del usuario:", userFuncs);
+        
+        // Filtrar solo las funcionalidades activas
+        const activeFuncs = userFuncs
+            .filter(f => f.estado)
+            .map(f => f.id_funcionalidad);
+            
+        setSelectedFuncionalidades(activeFuncs);
+    } catch (error) {
+        console.error("Error loading user funcionalidades:", error);
+        setError("Error cargando funcionalidades del usuario");
+    }
+    
     setModalMode("edit");
     setShowModal(true);
   };
@@ -124,29 +156,42 @@ export default function UsersPage() {
     e.preventDefault();
     
     try {
-      let updatedUsers;
-      
-      if (modalMode === "create") {
-        const newUser = await createUser(formData);
-        updatedUsers = [...users, newUser];
-      } else {
-        // Edit mode
-        const updatedUser = await updateUser(currentUser.cedula, formData);
-        updatedUsers = users.map(user => 
-          user.cedula === currentUser.cedula? updatedUser : user
-        );
-      }
-      
-      setUsers(updatedUsers);
-      handleCloseModal();
-      setError("");
+        const dataToSend = {
+            ...formData,
+            funcionalidades: [...new Set(selectedFuncionalidades)]
+        };
+        
+        if (modalMode === "create") {
+            await createUser(dataToSend);
+        } else {
+            // Solo enviar los campos que han sido modificados
+            const updatedFields = {};
+            Object.keys(dataToSend).forEach(key => {
+                if (dataToSend[key] !== undefined && 
+                    dataToSend[key] !== '' && 
+                    (key === 'funcionalidades' || dataToSend[key] !== currentUser[key])) {
+                    updatedFields[key] = dataToSend[key];
+                }
+            });
+
+            await updateUser(currentUser.cedula, updatedFields);
+        }
+
+        // Recargar la lista de usuarios
+        const updatedUsersList = await getUsers();
+        setUsers(updatedUsersList);
+        
+        // Mostrar mensaje de éxito
+        setError("");
+        handleCloseModal();
     } catch (err) {
-      console.error("Error:", err);
-      setError(
-        modalMode === "create" 
-          ? "Error creando usuario. Intente nuevamente." 
-          : "Error actualizando usuario. Intente nuevamente."
-      );
+        console.error("Error:", err);
+        setError(
+            modalMode === "create" 
+                ? "Error creando usuario" 
+                : "Error actualizando usuario"
+        );
+        return; // Evitar cerrar el modal si hay error
     }
   };
 
@@ -179,6 +224,16 @@ export default function UsersPage() {
   const getRoleName = (roleId) => {
     const role = roles.find(role => role.id_rol === roleId);
     return role ? role.nombre : "Desconocido";
+  };
+
+  const handleFuncionalidadToggle = (funcionalidadId) => {
+    setSelectedFuncionalidades(prev => {
+        if (prev.includes(funcionalidadId)) {
+            return prev.filter(id => id !== funcionalidadId);
+        } else {
+            return [...prev, funcionalidadId];
+        }
+    });
   };
 
   if (loading) {
@@ -227,7 +282,7 @@ export default function UsersPage() {
                   </tr>
                 ) : (
                   users.map(user => (
-                    <tr key={user.id_usuario}>
+                    <tr key={user.cedula}>
                       <td>{user.nombre}</td>
                       <td>{user.cedula}</td>
                       <td>{user.email}</td>
@@ -352,6 +407,35 @@ export default function UsersPage() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Funcionalidades</label>
+                    <table className="tabla-funcionalidades">
+                        <thead>
+                            <tr>
+                                <th>Funcionalidad</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {funcionalidades.map(func => (
+                                <tr key={func.id_funcionalidad}>
+                                    <td>{func.nombre}</td>
+                                    <td>
+                                        <label className="switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedFuncionalidades.includes(func.id_funcionalidad)}
+                                                onChange={() => handleFuncionalidadToggle(func.id_funcionalidad)}
+                                            />
+                                            <span className="slider"></span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                   </div>
                   
                   <div className="form-buttons">

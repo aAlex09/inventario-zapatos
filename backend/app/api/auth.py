@@ -91,14 +91,19 @@ def send_password_reset_email(email: str, reset_token: str, background_tasks: Ba
     # Ejecutar en segundo plano
     background_tasks.add_task(send_email)
 
-@router.post("/login", response_model=TokenResponse) 
+@router.post("/login", response_model=TokenResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.email == request.email).first()
     if not user or not pwd_context.verify(request.password, user.contraseña_login):
         raise HTTPException(status_code=401, detail="usuario o contraseña incorrectos")
 
-    token_data = {"sub": user.email, "role": user.tipo_usuario_rol} # Datos del token JWT
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM) # Generar token JWT
+    # Include both email and cedula in token
+    token_data = {
+        "sub": user.email,
+        "cedula": user.cedula,
+        "role": user.tipo_usuario_rol
+    }
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
     return {"access_token": token, "token_type": "bearer"}
 

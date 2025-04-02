@@ -59,9 +59,14 @@ export const createUser = async (userData) => {
 // Actualizar un usuario
 export const updateUser = async (cedula, userData) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${cedula}`, userData, getConfig());
+    const response = await axios.put(
+      `${API_URL}/users/${cedula}`, 
+      userData,
+      getConfig()
+    );
     return response.data;
   } catch (error) {
+    console.error("Error updating user:", error);
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       localStorage.removeItem('token');
       window.location.href = '/';

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
+from typing import Optional, List
 
 # Role schemas
 class RoleBase(BaseModel):
@@ -33,6 +33,7 @@ class UserUpdate(BaseModel):
     direccion_empleado: Optional[str] = None
     contraseña_login: Optional[str] = None  # Optional
     tipo_usuario_rol: Optional[int] = None
+    funcionalidades: Optional[List[int]] = None  # Agregar esta línea
 
 class UserResponse(UserBase):
     cedula: str  # Cambiar id_usuario por cedula
@@ -55,3 +56,26 @@ class PasswordResetRequest(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     password: str
+
+class FuncionalidadResponse(BaseModel):
+    id_funcionalidad: int
+    nombre: str
+    estado: Optional[bool] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class FuncionalidadEstado(BaseModel):
+    id_funcionalidad: int
+    estado: bool    
+
+class ActualizarFuncionalidadesRequest(BaseModel):
+    funcionalidades: List[FuncionalidadEstado]
+
+class UsuarioUpdateRequest(BaseModel):
+    nombre: Optional[str]
+    email: Optional[str]
+    telefono: Optional[str]
+    direccion_empleado: Optional[str]
+    contraseña_login: Optional[str]
+    tipo_usuario_rol: Optional[int]
+    funcionalidades: Optional[List[int]]  # 👈 importante
