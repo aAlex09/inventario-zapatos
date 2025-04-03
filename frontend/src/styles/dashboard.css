@@ -284,3 +284,110 @@
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 }
+
+/* Estilos base para la página de inventario con fuentes consistentes */
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #e3e3e3;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.content-container {
+  padding: 20px;
+  flex: 1;
+  color: #e3e3e3;
+  background-color: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 95%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.inventory-header h1 {
+  color: #e3e3e3;
+  font-weight: 600;
+  font-size: 1.75rem;
+  position: relative;
+  padding-left: 15px;
+}
+
+.inventory-header h1::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 25px;
+  background: linear-gradient(to bottom, #6764ff, #9564ff);
+  border-radius: 5px;
+}
+
+/* Actualiza también los estilos para todas las fuentes en los elementos interactivos */
+button, input, select, textarea {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Títulos de secciones */
+.filters-section h3 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+/* Modal titles */
+.modal-header h2 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+/* Table headers */
+.products-table th {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+/* Botones consistentes con dashboard */
+.create-product-btn {
+  background-color: #6764ff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: all 0.3s ease;
+}
+
+.create-product-btn:hover {
+  background-color: #5857db;
+  box-shadow: 0 3px 8px rgba(103, 100, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Botones de filtros */
+.btn-apply, .btn-reset {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Botones de acción en la tabla */
+.btn-edit, .btn-delete {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+}
+
+/* Inputs y labels */
+.filter-group label,
+.form-group label {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.filter-group input,
+.form-group input {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
