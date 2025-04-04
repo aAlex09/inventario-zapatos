@@ -569,3 +569,17 @@
     min-width: 1100px;
   }
 }
+
+/* Estilos para campos de precio */
+.products-table td:nth-child(7), /* Precio Compra */
+.products-table td:nth-child(8) { /* Precio Venta */
+  font-weight: 600;
+  color: #b1f8b1;
+  text-align: right;
+  padding-right: 25px;
+}
+
+/* Destacar el precio de venta un poco más */
+.products-table td:nth-child(8) {
+  color: #a1f1ff;
+}

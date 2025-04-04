@@ -3,6 +3,16 @@ import { getProductos, createProducto, updateProducto, deleteProducto } from '..
 import Navbar from '../components/Navbar';
 import '../styles/inventario.css';
 
+// Agrega esta función formatadora en la parte superior de tu componente InventarioPage
+const formatCOP = (value) => {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 const InventarioPage = ({ userData }) => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -433,8 +443,8 @@ const InventarioPage = ({ userData }) => {
                     <td>{producto.talla}</td>
                     <td>{producto.marca}</td>
                     <td>{producto.categoria}</td>
-                    <td>${producto.precio_compra}</td>
-                    <td>${producto.precio_venta}</td>
+                    <td>{formatCOP(producto.precio_compra)}</td>
+                    <td>{formatCOP(producto.precio_venta)}</td>
                     <td>{producto.stock}</td>
                     <td className="action-buttons">
                       <button 
