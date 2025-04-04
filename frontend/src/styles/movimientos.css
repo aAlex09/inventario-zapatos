@@ -1,0 +1,71 @@
+/* Movimientos page styles */
+.movements-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.movements-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.movements-table th,
+.movements-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.movements-table th {
+  background-color: #f2f2f2;
+  color: #333;
+  font-weight: 600;
+}
+
+.movements-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.tipo-entrada {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.tipo-salida {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.tipo-ajuste {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  color: #888;
+  padding: 30px;
+}
+
+.create-movement-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.create-movement-btn:hover {
+  background-color: #0069d9;
+}

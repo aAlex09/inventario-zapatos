@@ -122,3 +122,24 @@ class ProductoResponse(ProductoBase):
     activo: bool
     
     model_config = ConfigDict(from_attributes=True)
+
+# Base schema for movement data
+class MovimientoBase(BaseModel):
+    id_producto: int
+    tipo_movimiento: str  # "ENTRADA", "SALIDA", "AJUSTE"
+    cantidad: int
+    referencia: Optional[str] = None
+    notas: Optional[str] = None
+
+# Schema for creating new movements
+class MovimientoCreate(MovimientoBase):
+    pass
+
+# Schema for movement responses
+class MovimientoResponse(MovimientoBase):
+    id_movimiento: int
+    usuario_cedula: str
+    fecha_movimiento: datetime
+    
+    class Config:
+        orm_mode = True

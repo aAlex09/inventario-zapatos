@@ -106,3 +106,26 @@ def remove_funcionalidad(
 def get_all_funcionalidades(db: Session = Depends(get_db)):
     """Get all available functionalities in the system"""
     return db.query(Funcionalidad).all()
+
+@router.get("/users/{cedula}/funcionalidades/{id_funcionalidad}", response_model=bool)
+def check_user_funcionalidad(
+    cedula: str, 
+    id_funcionalidad: int, 
+    db: Session = Depends(get_db)
+):
+    """Check if a specific functionality is assigned to a user"""
+    # Check if user exists
+    user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Check if the assignment exists and is active
+    assignment = (
+        db.query(UsuarioFuncionalidad)
+        .filter(UsuarioFuncionalidad.usuario_cedula == cedula)
+        .filter(UsuarioFuncionalidad.funcionalidad_id == id_funcionalidad)
+        .filter(UsuarioFuncionalidad.estado == True)
+        .first()
+    )
+    
+    return assignment is not None

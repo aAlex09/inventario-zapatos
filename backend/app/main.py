@@ -5,7 +5,7 @@ from app.api.users import router as users_router
 from app.database import engine, Base
 from app.init_db import init_db  # Import the initialization function
 from app.api.funcionalidades import router as funcionalidades_router
-from app.api import users, auth, funcionalidades, inventario  # Añadir inventario aquí
+from app.api import users, auth, funcionalidades, inventario, movimientos  # Añadir inventario aquí
 import logging
 
 # Set up logging
@@ -43,3 +43,4 @@ app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(funcionalidades.router, prefix="/api", tags=["funcionalidades"])
 app.include_router(inventario.router, prefix="/api", tags=["inventario"])  # Añadir esta línea
+app.include_router(movimientos.router, prefix="/api/movimientos", tags=["movimientos"])

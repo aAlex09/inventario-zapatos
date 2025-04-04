@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Float, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Float, DateTime, Numeric, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -29,6 +29,7 @@ class Usuario(Base):
     # Relaciones
     rol = relationship("Rol", back_populates="usuarios")
     funcionalidades = relationship("UsuarioFuncionalidad", back_populates="usuario")
+    movimientos = relationship("MovimientoInventario", back_populates="usuario")
 
 
 # Tabla de Funcionalidades
@@ -72,3 +73,24 @@ class Producto(Base):
     imagen_url = Column(String, nullable=True)
     fecha_ingreso = Column(DateTime, default=func.now())
     activo = Column(Boolean, default=True)
+    
+    # Relación con Movimientos de Inventario
+    movimientos = relationship("MovimientoInventario", back_populates="producto")
+
+
+class MovimientoInventario(Base):
+    __tablename__ = "movimientos_inventario"
+
+    id_movimiento = Column(Integer, primary_key=True, index=True)
+    id_producto = Column(Integer, ForeignKey("productos.id_producto"), nullable=False)
+    tipo_movimiento = Column(String, nullable=False)  # ENTRADA, SALIDA, AJUSTE
+    cantidad = Column(Integer, nullable=False)
+    fecha_movimiento = Column(DateTime, default=func.now)
+    precio_unitario = Column(Numeric(10, 2), nullable=False)
+    usuario_cedula = Column(String, ForeignKey("usuarios.cedula"), nullable=False)
+    referencia = Column(String)
+    notas = Column(Text)
+    
+    # Relaciones
+    producto = relationship("Producto", back_populates="movimientos")
+    usuario = relationship("Usuario", back_populates="movimientos")

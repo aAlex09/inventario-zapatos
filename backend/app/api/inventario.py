@@ -105,3 +105,9 @@ def delete_producto(
     producto.activo = False
     db.commit()
     return {"message": "Producto eliminado correctamente"}
+
+@router.get("/bodega/productos", response_model=List[ProductoResponse])
+def get_bodega_productos(db: Session = Depends(get_db),
+                       current_user = Depends(get_current_user)):
+    productos = db.query(Producto).filter(Producto.activo == True).all()
+    return productos
