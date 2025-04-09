@@ -123,23 +123,21 @@ class ProductoResponse(ProductoBase):
     
     model_config = ConfigDict(from_attributes=True)
 
-# Base schema for movement data
+# Movimiento schemas
 class MovimientoBase(BaseModel):
     id_producto: int
-    tipo_movimiento: str  # "ENTRADA", "SALIDA", "AJUSTE"
+    tipo_movimiento: str
     cantidad: int
+    precio_unitario: float  # Asegurarse de incluir este campo
     referencia: Optional[str] = None
     notas: Optional[str] = None
 
-# Schema for creating new movements
 class MovimientoCreate(MovimientoBase):
     pass
 
-# Schema for movement responses
 class MovimientoResponse(MovimientoBase):
     id_movimiento: int
     usuario_cedula: str
-    fecha_movimiento: datetime
+    fecha_movimiento: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)  # Actualizar a la nueva sintaxis

@@ -43,4 +43,4 @@ app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(funcionalidades.router, prefix="/api", tags=["funcionalidades"])
 app.include_router(inventario.router, prefix="/api", tags=["inventario"])  # Añadir esta línea
-app.include_router(movimientos.router, prefix="/api/movimientos", tags=["movimientos"])
+app.include_router(movimientos.router, prefix="/api", tags=["movimientos"])

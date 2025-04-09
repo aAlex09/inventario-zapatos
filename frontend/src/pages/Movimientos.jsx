@@ -14,22 +14,41 @@ const MovimientosPage = ({ userData }) => {
   const [error, setError] = useState(null);
   
   useEffect(() => {
-    const fetchMovimientos = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_URL}/movimientos`, {
+        // Obtener movimientos
+        const movimientosResponse = await axios.get(`${API_URL}/movimientos`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setMovimientos(response.data);
+        
+        // Obtener productos
+        const productosResponse = await axios.get(`${API_URL}/productos`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Crear mapa de productos por ID
+        const productosMap = {};
+        productosResponse.data.forEach(producto => {
+          productosMap[producto.id_producto] = producto;
+        });
+        
+        // Enriquecer los movimientos con información de productos
+        const movimientosEnriquecidos = movimientosResponse.data.map(mov => ({
+          ...mov,
+          producto: productosMap[mov.id_producto] || { nombre: `Producto #${mov.id_producto}` }
+        }));
+        
+        setMovimientos(movimientosEnriquecidos);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching movimientos:', err);
-        setError('No se pudieron cargar los movimientos.');
+        console.error('Error fetching data:', err);
+        setError('No se pudieron cargar los datos.');
         setLoading(false);
       }
     };
     
-    fetchMovimientos();
+    fetchData();
   }, []);
   
   return (
@@ -70,7 +89,12 @@ const MovimientosPage = ({ userData }) => {
                   movimientos.map(mov => (
                     <tr key={mov.id_movimiento}>
                       <td>{new Date(mov.fecha_movimiento).toLocaleString()}</td>
-                      <td>{mov.producto?.nombre || 'N/A'}</td>
+                      <td>
+                        {/* Manejar diferentes formas en que podría venir la información del producto */}
+                        {mov.producto?.nombre || 
+                         (typeof mov.producto === 'string' ? mov.producto : 
+                         (mov.producto_nombre || `Producto #${mov.id_producto}`))}
+                      </td>
                       <td className={`tipo-${mov.tipo_movimiento.toLowerCase()}`}>
                         {mov.tipo_movimiento}
                       </td>

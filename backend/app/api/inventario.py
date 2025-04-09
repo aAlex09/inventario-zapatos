@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
 from app.database import SessionLocal
 from app.models import Producto, Usuario
 from app.schemas import ProductoCreate, ProductoUpdate, ProductoResponse
@@ -69,7 +70,7 @@ def update_producto(
     producto_id: int, 
     producto: ProductoUpdate, 
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(check_functionality("Gestionar Inventario"))
+    current_user: Usuario = Depends(check_functionality("Inventario"))
 ):
     """Update a product"""
     db_producto = db.query(Producto).filter(Producto.id_producto == producto_id).first()
@@ -108,6 +109,12 @@ def delete_producto(
 
 @router.get("/bodega/productos", response_model=List[ProductoResponse])
 def get_bodega_productos(db: Session = Depends(get_db),
-                       current_user = Depends(get_current_user)):
+                       current_user: Usuario = Depends(get_current_user)):
     productos = db.query(Producto).filter(Producto.activo == True).all()
+    
+    # Asegurarse de que todos los productos tengan un valor para fecha_ingreso
+    for producto in productos:
+        if producto.fecha_ingreso is None:
+            producto.fecha_ingreso = datetime.now()
+    
     return productos

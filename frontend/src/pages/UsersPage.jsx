@@ -139,7 +139,9 @@ const UsersPage = () => {
                 <td>{user.nombre}</td>
                 <td>{user.email}</td>
                 <td>{user.telefono}</td>
-                <td>{user.rol?.nombre || 'Sin rol'}</td>
+                <td>
+                  {roles.find(r => r.id_rol === user.tipo_usuario_rol)?.nombre || 'Sin rol'}
+                </td>
                 <td className="action-buttons">
                   <button 
                     className="btn-functionalities" 

@@ -85,7 +85,7 @@ class MovimientoInventario(Base):
     id_producto = Column(Integer, ForeignKey("productos.id_producto"), nullable=False)
     tipo_movimiento = Column(String, nullable=False)  # ENTRADA, SALIDA, AJUSTE
     cantidad = Column(Integer, nullable=False)
-    fecha_movimiento = Column(DateTime, default=func.now)
+    fecha_movimiento = Column(DateTime, default=func.now())
     precio_unitario = Column(Numeric(10, 2), nullable=False)
     usuario_cedula = Column(String, ForeignKey("usuarios.cedula"), nullable=False)
     referencia = Column(String)

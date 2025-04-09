@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import UserFunctionalitiesList from '../components/UserFunctionalitiesList';
 import '../styles/dashboard.css';
@@ -7,6 +7,18 @@ import '../styles/dashboard.css';
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Función para cerrar sesión
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userCedula');
+    
+    // Limpiar historial de navegación
+    window.history.replaceState(null, '', '/');
+    
+    navigate('/', { replace: true });
+  }, [navigate]);
 
   useEffect(() => {
     // Verificar autenticación al cargar
@@ -14,32 +26,84 @@ const Dashboard = () => {
     const cedula = localStorage.getItem('userCedula');
     
     if (!token) {
-      navigate('/');
+      handleLogout();
       return;
     }
     
     try {
       const decodedToken = jwtDecode(token);
+      
+      // Verificar expiración del token
+      if (decodedToken.exp * 1000 < Date.now()) {
+        handleLogout();
+        return;
+      }
+      
       setUserData({
         ...decodedToken,
         cedula: cedula || decodedToken.cedula
       });
     } catch (error) {
       console.error("Error decoding token:", error);
-      localStorage.removeItem('token');
-      navigate('/');
+      handleLogout();
+      return;
     }
-  }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userCedula');
-    navigate('/');
-  };
+    // Configuración inicial del historial
+    window.history.replaceState({ dashboardPathname: location.pathname }, '', location.pathname);
 
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
+    // Manejar evento de navegación hacia atrás
+    const handlePopState = (event) => {
+      // Si no hay un estado específico o estamos saliendo del dashboard
+      if (!event.state || !event.state.dashboardPathname) {
+        handleLogout();
+      }
+    };
+
+    // Manejar cierre de pestaña o navegador
+    const handleBeforeUnload = (event) => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userCedula');
+    };
+
+    // Añadir listeners
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Limpieza al desmontar
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [navigate, location.pathname, handleLogout]);
+
+  // Función de navegación segura
+  const handleNavigation = useCallback((path) => {
+    // Verificar que el token siga siendo válido antes de navegar
+    const token = localStorage.getItem('token');
+    
+    try {
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        
+        // Si el token ha expirado, cerrar sesión
+        if (decodedToken.exp * 1000 < Date.now()) {
+          handleLogout();
+          return;
+        }
+      } else {
+        handleLogout();
+        return;
+      }
+      
+      // Agregar estado al historial para la navegación
+      window.history.pushState({ dashboardPathname: path }, '', path);
+      navigate(path);
+    } catch (error) {
+      console.error("Error en navegación:", error);
+      handleLogout();
+    }
+  }, [navigate, handleLogout]);
 
   if (!userData) {
     return <div className="loading">Cargando...</div>;

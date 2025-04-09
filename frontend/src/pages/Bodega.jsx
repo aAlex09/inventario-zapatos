@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
 const BodegaPage = ({ userData }) => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,8 +11,9 @@ const BodegaPage = ({ userData }) => {
   const [showMovementModal, setShowMovementModal] = useState(false);
   const [movementForm, setMovementForm] = useState({
     id_producto: '',
-    tipo_movimiento: 'ENTRADA', // Default value (ENTRADA or SALIDA)
+    tipo_movimiento: 'ENTRADA',
     cantidad: 1,
+    precio_unitario: 0, // Añadir precio unitario
     referencia: '',
     notas: ''
   });
@@ -20,13 +23,63 @@ const BodegaPage = ({ userData }) => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await axios.get('/api/bodega/productos', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        setProductos(response.data);
+        console.log('Intentando obtener productos de bodega...');
+        console.log('Token presente:', !!localStorage.getItem('token'));
+        
+        // Intenta primero usando la ruta completa
+        let response;
+        try {
+          response = await axios.get(`${API_URL}/bodega/productos`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+        } catch (initialError) {
+          console.log('Error con ruta completa, intentando ruta relativa...');
+          // Si falla, intenta con la ruta relativa
+          response = await axios.get('/api/bodega/productos', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+        }
+        
+        console.log('Respuesta recibida:', response.data);
+        
+        // Verificar y sanitizar datos
+        const productosValidados = response.data.map(producto => ({
+          ...producto,
+          id_producto: producto.id_producto || 0,
+          codigo: producto.codigo || 'Sin código',
+          nombre: producto.nombre || 'Sin nombre',
+          stock: producto.stock || 0
+        }));
+        
+        setProductos(productosValidados);
         setLoading(false);
       } catch (err) {
-        setError('Error al cargar los productos');
+        console.error('Error completo:', err);
+        console.error('Error status:', err.response?.status);
+        console.error('Error data:', err.response?.data);
+        
+        // Mensaje de error más descriptivo
+        let errorMsg = 'Error al cargar los productos';
+        if (err.response) {
+          if (err.response.status === 404) {
+            errorMsg += ': Ruta no encontrada. Verifica la configuración del API.';
+          } else if (err.response.status === 401) {
+            errorMsg += ': Sesión expirada o no autorizada.';
+            // Redirigir al login
+            setTimeout(() => {
+              localStorage.removeItem('token');
+              window.location.href = '/';
+            }, 3000);
+          } else {
+            errorMsg += `: ${err.response.data?.detail || err.response.statusText}`;
+          }
+        } else if (err.request) {
+          errorMsg += ': No se pudo conectar con el servidor.';
+        } else {
+          errorMsg += `: ${err.message}`;
+        }
+        
+        setError(errorMsg);
         setLoading(false);
       }
     };
@@ -48,7 +101,8 @@ const BodegaPage = ({ userData }) => {
     setSelectedProduct(product);
     setMovementForm({
       ...movementForm,
-      id_producto: productId
+      id_producto: productId,
+      precio_unitario: product ? product.precio_venta : 0 // Usar el precio de venta del producto seleccionado
     });
   };
 
@@ -68,7 +122,7 @@ const BodegaPage = ({ userData }) => {
       }
       
       // Send request to backend
-      const response = await axios.post('/api/movimientos', movementForm, {
+      const response = await axios.post(`${API_URL}/movimientos`, movementForm, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       
@@ -80,20 +134,57 @@ const BodegaPage = ({ userData }) => {
         id_producto: '',
         tipo_movimiento: 'ENTRADA',
         cantidad: 1,
+        precio_unitario: 0, // Añadir precio unitario aquí también
         referencia: '',
         notas: ''
       });
       setSelectedProduct(null);
       setShowMovementModal(false);
       
-      // Refresh product list to show updated stock
-      const productsResponse = await axios.get('/api/bodega/productos', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setProductos(productsResponse.data);
+      try {
+        // Refresh product list to show updated stock
+        const productsResponse = await axios.get(`${API_URL}/bodega/productos`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        
+        // Verificar y sanitizar datos
+        const productosValidados = productsResponse.data.map(producto => ({
+          ...producto,
+          id_producto: producto.id_producto || 0,
+          codigo: producto.codigo || 'Sin código',
+          nombre: producto.nombre || 'Sin nombre',
+          stock: producto.stock || 0
+        }));
+        
+        setProductos(productosValidados);
+      } catch (refreshErr) {
+        console.error('Error al actualizar la lista:', refreshErr);
+        // No mostramos error aquí para no sobreescribir el mensaje de éxito
+      }
     } catch (err) {
-      setError('Error al registrar el movimiento');
-      console.error(err);
+      console.error('Error completo:', err);
+      let errorMsg = 'Error al registrar el movimiento';
+      
+      if (err.response) {
+        console.error('Error status:', err.response.status);
+        console.error('Error data:', err.response.data);
+        
+        if (err.response.status === 404) {
+          errorMsg = 'Error 404: Endpoint no encontrado. Verifica la ruta del API.';
+        } else if (err.response.status === 400) {
+          errorMsg = `Error en los datos: ${err.response.data.detail || 'Verifica los campos'}`;
+        } else if (err.response.status === 401) {
+          errorMsg = 'Sesión expirada o credenciales inválidas';
+        } else {
+          errorMsg = `Error ${err.response.status}: ${err.response.data.detail || err.response.statusText}`;
+        }
+      } else if (err.request) {
+        errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+      } else {
+        errorMsg = `Error inesperado: ${err.message}`;
+      }
+      
+      setError(errorMsg);
     }
   };
 
@@ -134,23 +225,26 @@ const BodegaPage = ({ userData }) => {
                     <td colSpan="4" className="no-data">No hay productos para mostrar</td>
                   </tr>
                 ) : (
-                  productos.map(producto => (
-                    <tr key={producto.id_producto}>
+                  productos.map((producto, index) => (
+                    <tr key={producto.id_producto || index}>
                       <td className="image-cell">
                         {producto.imagen_url ? (
                           <img 
                             src={producto.imagen_url} 
-                            alt={producto.nombre} 
+                            alt={producto.nombre || 'Producto'} 
                             className="product-image"
-                            onError={(e) => { e.target.src = '/placeholder.png'; }}
+                            onError={(e) => { 
+                              e.target.onerror = null; 
+                              e.target.src = "https://via.placeholder.com/80?text=No+Image"; 
+                            }}
                           />
                         ) : (
                           <div className="no-image">📷</div>
                         )}
                       </td>
-                      <td>{producto.codigo}</td>
-                      <td>{producto.nombre}</td>
-                      <td>{producto.stock}</td>
+                      <td>{producto.codigo || 'Sin código'}</td>
+                      <td>{producto.nombre || 'Sin nombre'}</td>
+                      <td>{producto.stock !== undefined ? producto.stock : 'N/A'}</td>
                     </tr>
                   ))
                 )}
@@ -213,6 +307,19 @@ const BodegaPage = ({ userData }) => {
                   value={movementForm.cantidad}
                   onChange={handleMovementFormChange}
                   min="1"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Precio Unitario</label>
+                <input 
+                  type="number" 
+                  name="precio_unitario" 
+                  value={movementForm.precio_unitario}
+                  onChange={handleMovementFormChange}
+                  min="0"
+                  step="0.01"
                   required
                 />
               </div>
