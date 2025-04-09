@@ -165,13 +165,44 @@ const InventarioPage = ({ userData }) => {
   // Create product
   const handleCreateProduct = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+    
     try {
+      // Validaciones adicionales
+      if (!productForm.codigo || productForm.codigo.trim() === '') {
+        setError('El código del producto es obligatorio');
+        return;
+      }
+      
+      if (!productForm.nombre || productForm.nombre.trim() === '') {
+        setError('El nombre del producto es obligatorio');
+        return;
+      }
+      
+      if (isNaN(parseFloat(productForm.precio_compra)) || parseFloat(productForm.precio_compra) <= 0) {
+        setError('El precio de compra debe ser un número mayor que cero');
+        return;
+      }
+      
+      if (isNaN(parseFloat(productForm.precio_venta)) || parseFloat(productForm.precio_venta) <= 0) {
+        setError('El precio de venta debe ser un número mayor que cero');
+        return;
+      }
+      
+      if (isNaN(parseInt(productForm.stock, 10))) {
+        setError('El stock debe ser un número entero');
+        return;
+      }
+      
       const payload = {
         ...productForm,
         precio_compra: parseFloat(productForm.precio_compra),
         precio_venta: parseFloat(productForm.precio_venta),
         stock: parseInt(productForm.stock, 10)
       };
+      
+      console.log("Enviando datos de producto:", payload);
       
       await createProducto(payload);
       setSuccess('Producto creado exitosamente');
@@ -182,11 +213,31 @@ const InventarioPage = ({ userData }) => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error("Error al crear producto:", err);
-      console.error("Response data:", err.response?.data);
-      setError(`Error al crear el producto: ${err.response?.data?.detail || err.message}`);
       
-      // Clear error message after 3 seconds
-      setTimeout(() => setError(''), 3000);
+      let errorMessage = 'Error al crear el producto';
+      
+      if (err.response) {
+        if (err.response.status === 400) {
+          errorMessage = `Error: ${err.response.data.detail || 'Datos inválidos'}`;
+        } else if (err.response.status === 401 || err.response.status === 403) {
+          errorMessage = 'No tienes permiso para crear productos';
+        } else if (err.response.status === 404) {
+          errorMessage = 'Endpoint no encontrado. Verifica la URL de la API';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Error interno del servidor';
+        } else {
+          errorMessage = `Error: ${err.response.data.detail || err.message}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet o la URL de la API';
+      } else {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setError(''), 5000);
     }
   };
 

@@ -59,7 +59,7 @@ class UsuarioFuncionalidad(Base):
 class Producto(Base):
     __tablename__ = "productos"
     
-    id_producto = Column(Integer, primary_key=True, index=True)
+    id_producto = Column(Integer, primary_key=True, autoincrement=True)
     codigo = Column(String, unique=True, index=True)
     nombre = Column(String, index=True)
     descripcion = Column(String, nullable=True)

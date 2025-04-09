@@ -13,12 +13,12 @@ def create_basic_functionalities():
     try:
         # Define basic functionalities
         basic_functionalities = [
-            {"id_funcionalidad": 1, "nombre": "Administrar Usuarios"},
-            {"id_funcionalidad": 2, "nombre": "Gestionar Inventario"},
-            {"id_funcionalidad": 3, "nombre": "Realizar Ventas"},
-            {"id_funcionalidad": 4, "nombre": "Ver Reportes"},
-            {"id_funcionalidad": 5, "nombre": "Gestionar Proveedores"},
-            {"id_funcionalidad": 6, "nombre": "Administrar Configuración"},
+            {"id_funcionalidad": 1, "nombre": "Usuarios"},
+            {"id_funcionalidad": 2, "nombre": "Inventario"},
+            {"id_funcionalidad": 3, "nombre": "Ventas"},
+            {"id_funcionalidad": 4, "nombre": "Reportes"},
+            {"id_funcionalidad": 5, "nombre": "Proveedores"},
+            {"id_funcionalidad": 6, "nombre": "Configuración"},
         ]
         
         # Create functionalities if they don't exist

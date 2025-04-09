@@ -1,28 +1,36 @@
 /* Movimientos page styles */
 .movements-table-container {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden; /* Change from auto to hidden */
   margin-top: 20px;
+  padding-bottom: 0; /* Remove bottom padding if any */
 }
 
 .movements-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
+  /* Remove min-width to prevent horizontal scroll */
+  table-layout: fixed; /* Add fixed layout */
 }
 
+/* Add width constraints for table columns */
 .movements-table th,
 .movements-table td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #30363d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.movements-table th {
-  background-color: #f2f2f2;
-  color: #333;
-  font-weight: 600;
-}
+/* Suggested column widths */
+.movements-table th:nth-child(1) { width: 15%; } /* Fecha */
+.movements-table th:nth-child(2) { width: 25%; } /* Producto */
+.movements-table th:nth-child(3) { width: 15%; } /* Tipo */
+.movements-table th:nth-child(4) { width: 10%; } /* Cantidad */
+.movements-table th:nth-child(5) { width: 15%; } /* Usuario */
+.movements-table th:nth-child(6) { width: 20%; } /* Referencia */
 
 .movements-table tr:hover {
   background-color: #f9f9f9;
@@ -68,4 +76,42 @@
 
 .create-movement-btn:hover {
   background-color: #0069d9;
+}
+
+/* Estilos para el hover de las filas */
+.movements-table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.movements-table tbody tr:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(103, 100, 255, 0.15) 0%,
+    rgba(103, 100, 255, 0.05) 100%
+  );
+  color: #ffffff;
+  font-weight: 500;
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Asegurar que los tipos de movimiento mantengan sus colores en hover */
+.movements-table tbody tr:hover .tipo-entrada {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+.movements-table tbody tr:hover .tipo-salida {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.movements-table tbody tr:hover .tipo-ajuste {
+  color: #2196F3;
+  font-weight: 600;
+}
+
+/* Mejorar la legibilidad de las fechas en hover */
+.movements-table tbody tr:hover td:first-child {
+  font-weight: 600;
 }

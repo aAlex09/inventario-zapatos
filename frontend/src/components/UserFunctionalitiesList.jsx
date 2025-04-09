@@ -50,12 +50,12 @@ const UserFunctionalitiesList = ({ cedula }) => {
           {functionalities.map(func => (
             <div className="functionality-card" key={func.id_funcionalidad}>
               <div className="functionality-icon">
-                {func.nombre === "Administrar Usuarios" && "👥"}
-                {func.nombre === "Gestionar Inventario" && "📦"}
-                {func.nombre === "Realizar Ventas" && "💰"}
-                {func.nombre === "Ver Reportes" && "📊"}
-                {func.nombre === "Gestionar Proveedores" && "🏭"}
-                {func.nombre === "Administrar Configuración" && "⚙️"}
+                {func.nombre === "Usuarios" && "👥"}
+                {func.nombre === "Inventario" && "📦"}
+                {func.nombre === "Ventas" && "💰"}
+                {func.nombre === "Reportes" && "📊"}
+                {func.nombre === "Proveedores" && "🏭"}
+                {func.nombre === "Configuración" && "⚙️"}
               </div>
               <span>{func.nombre}</span>
             </div>

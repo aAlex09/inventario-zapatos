@@ -19,6 +19,8 @@ const BodegaPage = ({ userData }) => {
   });
   const [success, setSuccess] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -109,6 +111,16 @@ const BodegaPage = ({ userData }) => {
   const handleSubmitMovement = async (e) => {
     e.preventDefault();
     
+    // Validate stock for outbound movements
+    if (movementForm.tipo_movimiento === 'SALIDA') {
+      const currentStock = selectedProduct?.stock || 0;
+      if (movementForm.cantidad > currentStock) {
+        setErrorModalMessage(`Error: Stock insuficiente. Stock actual: ${currentStock}`);
+        setShowErrorModal(true);
+        return;
+      }
+    }
+
     try {
       // Validate form
       if (!movementForm.id_producto || !movementForm.cantidad) {
@@ -351,6 +363,23 @@ const BodegaPage = ({ userData }) => {
                 <button type="submit" className="btn-submit">Registrar Movimiento</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      
+      {showErrorModal && (
+        <div className="modal-backdrop">
+          <div className="error-modal">
+            <div className="modal-content">
+              <h2>⚠️ Error</h2>
+              <p>{errorModalMessage}</p>
+              <button 
+                className="close-modal-btn" 
+                onClick={() => setShowErrorModal(false)}
+              >
+                Entendido
+              </button>
+            </div>
           </div>
         </div>
       )}

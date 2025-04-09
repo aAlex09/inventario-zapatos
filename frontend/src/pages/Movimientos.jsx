@@ -58,9 +58,6 @@ const MovimientosPage = ({ userData }) => {
       <div className="content-container">
         <div className="inventory-header">
           <h1>Historial de Movimientos</h1>
-          <button className="btn-primary create-movement-btn" onClick={() => navigate('/bodega')}>
-            Registrar Movimiento
-          </button>
         </div>
         
         {error && <div className="error-message">{error}</div>}

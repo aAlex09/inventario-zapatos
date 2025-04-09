@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import UserFunctionalitiesList from '../components/UserFunctionalitiesList';
+import { getUserFunctionalities } from '../api/funcionalidades';
 import '../styles/dashboard.css';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
+  const [userFunctionalities, setUserFunctionalities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCard, setActiveCard] = useState(null);
+  const [showWorkingModal, setShowWorkingModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,6 +23,17 @@ const Dashboard = () => {
     
     navigate('/', { replace: true });
   }, [navigate]);
+
+  // Mapeo de funcionalidades a rutas y nombres para la navegación
+  const functionalityRouteMap = {
+    "Usuarios": { route: "/users", icon: "👥", color: "blue" },
+    "Inventario": { route: "/inventario", icon: "📦", color: "green" },
+    "Bodega": { route: "/bodega", icon: "🏭", color: "purple" },
+    "Movimientos": { route: "/movimientos", icon: "🔄", color: "orange" },
+    "Ventas": { route: "/sales", icon: "💰", color: "red" },
+    "Reportes": { route: "/reports", icon: "📊", color: "teal" },
+    "Configuración": { route: "/settings", icon: "⚙️", color: "gray" }
+  };
 
   useEffect(() => {
     // Verificar autenticación al cargar
@@ -39,10 +54,29 @@ const Dashboard = () => {
         return;
       }
       
+      // Asegurarse de que los campos estén correctamente mapeados
       setUserData({
         ...decodedToken,
-        cedula: cedula || decodedToken.cedula
+        cedula: decodedToken.cedula || cedula,
+        nombre: decodedToken.nombre || decodedToken.sub,
+        tipo_usuario: decodedToken.rol_nombre || 'Usuario', // Cambiado para usar rol_nombre
+        email: decodedToken.email || decodedToken.sub
       });
+
+      // Cargar las funcionalidades del usuario
+      const fetchFunctionalities = async () => {
+        try {
+          const userCedula = cedula || decodedToken.cedula;
+          const functionalities = await getUserFunctionalities(userCedula);
+          setUserFunctionalities(functionalities);
+        } catch (error) {
+          console.error("Error fetching functionalities:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchFunctionalities();
     } catch (error) {
       console.error("Error decoding token:", error);
       handleLogout();
@@ -79,14 +113,20 @@ const Dashboard = () => {
 
   // Función de navegación segura
   const handleNavigation = useCallback((path) => {
-    // Verificar que el token siga siendo válido antes de navegar
+    // Lista de rutas implementadas
+    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos'];
+    
+    if (!implementedRoutes.includes(path)) {
+      setShowWorkingModal(true);
+      return;
+    }
+
     const token = localStorage.getItem('token');
     
     try {
       if (token) {
         const decodedToken = jwtDecode(token);
         
-        // Si el token ha expirado, cerrar sesión
         if (decodedToken.exp * 1000 < Date.now()) {
           handleLogout();
           return;
@@ -96,8 +136,6 @@ const Dashboard = () => {
         return;
       }
       
-      // Agregar estado al historial para la navegación
-      window.history.pushState({ dashboardPathname: path }, '', path);
       navigate(path);
     } catch (error) {
       console.error("Error en navegación:", error);
@@ -105,47 +143,98 @@ const Dashboard = () => {
     }
   }, [navigate, handleLogout]);
 
-  if (!userData) {
-    return <div className="loading">Cargando...</div>;
+  if (loading || !userData) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Cargando...</p>
+      </div>
+    );
   }
 
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Panel de Control</h1>
+        <div className="header-logo">
+          <img 
+            src="https://cdn3.iconfinder.com/data/icons/other-icons/48/nike_shoes-1024.png" 
+            alt="Logo Inventario de Zapatos" 
+          />
+          <h1>Inventario de Zapatos</h1>
+        </div>
         <div className="user-info">
-          <span>¡Bienvenido!</span>
-          <button className="logout-button" onClick={handleLogout}>Cerrar Sesión</button>
+          <span>¡Bienvenido, {userData.sub}!</span>
+          <button onClick={handleLogout}>Cerrar Sesión</button>
         </div>
       </header>
 
-      <div className="dashboard-content">
-        <div className="dashboard-sidebar">
-          <h2>Menú Principal</h2>
-          <nav className="dashboard-nav">
-            <button onClick={() => handleNavigation('/dashboard')}>Inicio</button>
-            <button onClick={() => handleNavigation('/users')}>Usuarios</button>
-            <button onClick={() => handleNavigation('/inventario')}>Inventario</button>
-            <button onClick={() => handleNavigation('/bodega')}>Bodega</button>
-            <button onClick={() => handleNavigation('/movimientos')}>Movimientos</button>
-            <button onClick={() => handleNavigation('/sales')}>Ventas</button>
-            <button onClick={() => handleNavigation('/reports')}>Reportes</button>
-            <button onClick={() => handleNavigation('/settings')}>Configuración</button>
-          </nav>
-        </div>
-
-        <div className="dashboard-main">
-          <div className="welcome-section">
-            <h2>Resumen</h2>
-            <p>Cédula: {userData.cedula}</p>
+      <main className="dashboard-main">
+        <section className="user-profile">
+          <div className="profile-avatar">
+            {(userData.nombre ? userData.nombre.charAt(0) : userData.sub.charAt(0)).toUpperCase()}
           </div>
+          <div className="user-details">
+            <p>
+              <span className="detail-label">Nombre:</span> 
+              {userData.nombre || userData.sub}
+            </p>
+            <p>
+              <span className="detail-label">Cédula:</span> 
+              {userData.cedula}
+            </p>
+            <p>
+              <span className="detail-label">Rol:</span> 
+              {userData.tipo_usuario || 'Usuario'}
+            </p>
+            <p>
+              <span className="detail-label">Correo:</span> 
+              {userData.email || userData.sub}
+            </p>
+          </div>
+        </section>
 
-          {/* User Functionalities Section */}
-          <div className="functionalities-section">
-            <UserFunctionalitiesList cedula={userData.cedula} />
+        <div className="functionalities-section">
+          <h2 className="functionalities-title">Funcionalidades</h2>
+          <section className="functionalities-grid">
+            {userFunctionalities.map(func => {
+              const routeInfo = functionalityRouteMap[func.nombre];
+              if (!routeInfo) return null;
+
+              return (
+                <div 
+                  key={func.id_funcionalidad}
+                  className={`functionality-card ${routeInfo.color} ${activeCard === routeInfo.route ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveCard(routeInfo.route);
+                    handleNavigation(routeInfo.route);
+                  }}
+                  onMouseEnter={() => setActiveCard(routeInfo.route)}
+                  onMouseLeave={() => setActiveCard(null)}
+                >
+                  <div className="card-icon">{routeInfo.icon}</div>
+                  <h3>{func.nombre}</h3>
+                </div>
+              );
+            })}
+          </section>
+        </div>
+      </main>
+
+      {/* Modal de "En construcción" */}
+      {showWorkingModal && (
+        <div className="modal-backdrop" onClick={() => setShowWorkingModal(false)}>
+          <div className="working-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-content">
+              <h2>🚧✋🚧</h2>
+              <p>Estamos trabajando en este módulo</p>
+              <p className="coming-soon">¡Próximamente!</p>
+              <button className="close-modal-btn" onClick={() => setShowWorkingModal(false)}>
+                Entendido
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

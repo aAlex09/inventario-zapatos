@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
-from app.models import Usuario, Funcionalidad, UsuarioFuncionalidad
+from app.models import Usuario, Funcionalidad, UsuarioFuncionalidad, Rol
 from app.schemas import LoginRequest, TokenResponse, PasswordResetRequest, PasswordReset
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -143,25 +143,39 @@ def check_functionality(required_functionality_name: str):
         return current_user
     return verify_functionality
 
-@router.post("/login", response_model=TokenResponse) 
+@router.post("/login", response_model=TokenResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.email == request.email).first()
-    if not user or not pwd_context.verify(request.password, user.contraseña_login):
-        raise HTTPException(status_code=401, detail="usuario o contraseña incorrectos")
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales incorrectas"
+        )
 
-    # Include cedula in the token data
-    token_data = {
-        "sub": user.email, 
-        "role": user.tipo_usuario_rol,
-        "cedula": user.cedula  # Add this line to include cedula in the token
-    }
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+    if not pwd_context.verify(request.password, user.contraseña_login):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales incorrectas"
+        )
 
-    # Return cedula in the response
+    # Obtener el nombre del rol del usuario
+    rol = db.query(Rol).filter(Rol.id_rol == user.tipo_usuario_rol).first()
+    
+    # Create access token with complete user info
+    access_token = create_access_token(
+        data={
+            "sub": user.email,
+            "cedula": user.cedula,
+            "nombre": user.nombre,  # Nombre real del usuario
+            "rol_nombre": rol.nombre if rol else "Usuario",  # Nombre del rol
+            "email": user.email
+        }
+    )
+
     return {
-        "access_token": token, 
+        "access_token": access_token,
         "token_type": "bearer",
-        "cedula": user.cedula  # Add this line to include cedula in the response
+        "cedula": user.cedula
     }
 
 @router.post("/request-password-reset") # Ruta para solicitar restablecimiento de contraseña

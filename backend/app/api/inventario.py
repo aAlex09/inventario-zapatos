@@ -14,7 +14,7 @@ router = APIRouter()
 def create_producto(
     producto: ProductoCreate, 
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(check_functionality("Gestionar Inventario"))
+    current_user: Usuario = Depends(check_functionality("Inventario"))
 ):
     """Crear un nuevo producto (requiere funcionalidad 'Gestionar Inventario')"""
     existing_product = db.query(Producto).filter(Producto.codigo == producto.codigo).first()
@@ -96,7 +96,7 @@ def update_producto(
 def delete_producto(
     producto_id: int, 
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(check_functionality("Gestionar Inventario"))
+    current_user: Usuario = Depends(check_functionality("Inventario"))
 ):
     """Delete a product (soft delete)"""
     producto = db.query(Producto).filter(Producto.id_producto == producto_id).first()

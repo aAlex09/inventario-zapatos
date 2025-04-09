@@ -71,15 +71,63 @@ export const getProductoById = async (id) => {
 // Create new product
 export const createProducto = async (productoData) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/productos`,
-      productoData,
-      getConfig()
-    );
-    return response.data;
+    // Verificar si hay token
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No hay token de autenticación");
+      return null;
+    }
+    
+    console.log("Intentando crear producto con datos:", productoData);
+    console.log("API URL:", `${API_URL}/productos`);
+    
+    // Verificar que todos los campos requeridos estén presentes
+    const requiredFields = ['codigo', 'nombre', 'precio_compra', 'precio_venta', 'stock', 'talla', 'color', 'marca', 'categoria'];
+    for (const field of requiredFields) {
+      if (!productoData[field] && productoData[field] !== 0) {
+        console.error(`Campo requerido faltante: ${field}`);
+        throw new Error(`El campo "${field}" es requerido`);
+      }
+    }
+    
+    // Convertir números a formatos correctos
+    const formattedData = {
+      ...productoData,
+      precio_compra: parseFloat(productoData.precio_compra),
+      precio_venta: parseFloat(productoData.precio_venta),
+      stock: parseInt(productoData.stock, 10)
+    };
+    
+    // Intentar con ruta absoluta primero
+    try {
+      const response = await axios.post(
+        `${API_URL}/productos`,
+        formattedData,
+        getConfig()
+      );
+      console.log("Producto creado exitosamente:", response.data);
+      return response.data;
+    } catch (initialError) {
+      console.error("Error con ruta absoluta, intentando con ruta relativa...", initialError);
+      
+      // Si falla, intentar con ruta relativa
+      const response = await axios.post(
+        "/api/productos",
+        formattedData,
+        getConfig()
+      );
+      console.log("Producto creado exitosamente (ruta relativa):", response.data);
+      return response.data;
+    }
   } catch (error) {
-    console.error("Error creating product:", error);
+    console.error("Error detallado al crear producto:", error);
+    if (error.response) {
+      console.error("Respuesta del servidor:", error.response.status, error.response.data);
+    } else if (error.request) {
+      console.error("No se recibió respuesta del servidor. Verifica la conexión o el endpoint.");
+    }
     handleAuthError(error);
+    throw error; // Relanzar el error para que pueda ser manejado por el componente
   }
 };
 
