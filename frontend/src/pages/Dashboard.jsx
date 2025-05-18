@@ -32,7 +32,7 @@ const Dashboard = () => {
     "Movimientos": { route: "/movimientos", icon: "🔄", color: "orange" },
     "Ventas": { route: "/sales", icon: "💰", color: "red" },
     "Reportes": { route: "/reports", icon: "📊", color: "teal" },
-    "Configuración": { route: "/settings", icon: "⚙️", color: "gray" }
+    "Configuracion": { route: "/settings", icon: "⚙️", color: "gray" }
   };
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const Dashboard = () => {
   // Función de navegación segura
   const handleNavigation = useCallback((path) => {
     // Lista de rutas implementadas
-    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos'];
+    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos', '/reports'];
     
     if (!implementedRoutes.includes(path)) {
       setShowWorkingModal(true);
