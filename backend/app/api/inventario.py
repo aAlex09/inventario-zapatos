@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 from app.database import SessionLocal
-from app.models import Producto, Usuario
+from app.models import Producto, Usuario, MovimientoInventario
 from app.schemas import ProductoCreate, ProductoUpdate, ProductoResponse
 from app.api.auth import get_db, get_current_user, check_functionality
 
@@ -37,8 +37,9 @@ def get_productos(
     talla: Optional[str] = None,
     marca: Optional[str] = None,
     categoria: Optional[str] = None,
+    activo: Optional[bool] = True,  # Añadir parámetro con default True
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)  # Solo requiere autenticación
+    current_user: Usuario = Depends(get_current_user)
 ):
     """Get products with optional filters"""
     query = db.query(Producto)
@@ -54,7 +55,10 @@ def get_productos(
     if categoria:
         query = query.filter(Producto.categoria.ilike(f"%{categoria}%"))
     
-    productos = query.filter(Producto.activo == True).offset(skip).limit(limit).all()
+    # Filtro por estado activo
+    query = query.filter(Producto.activo == activo)
+    
+    productos = query.order_by(Producto.id_producto.desc()).offset(skip).limit(limit).all()
     return productos
 
 @router.get("/productos/{producto_id}", response_model=ProductoResponse)
@@ -103,9 +107,24 @@ def delete_producto(
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
-    producto.activo = False
+    producto.activo = False  # Soft delete
     db.commit()
     return {"message": "Producto eliminado correctamente"}
+
+@router.post("/productos/{producto_id}/restaurar")
+def restore_producto(
+    producto_id: int, 
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(check_functionality("Inventario"))
+):
+    """Restaurar un producto eliminado lógicamente"""
+    producto = db.query(Producto).filter(Producto.id_producto == producto_id).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    producto.activo = True  # Restaurar el producto
+    db.commit()
+    return {"message": "Producto restaurado correctamente"}
 
 @router.get("/bodega/productos", response_model=List[ProductoResponse])
 def get_bodega_productos(db: Session = Depends(get_db),
@@ -118,3 +137,40 @@ def get_bodega_productos(db: Session = Depends(get_db),
             producto.fecha_ingreso = datetime.now()
     
     return productos
+
+@router.get("/productos/inactivos", response_model=List[ProductoResponse])
+def get_productos_inactivos(
+    skip: int = 0, 
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Obtener productos inactivos (eliminados lógicamente)"""
+    try:
+        productos = db.query(Producto).filter(Producto.activo == False).order_by(Producto.id_producto.desc()).offset(skip).limit(limit).all()
+        
+        # Agregar log para verificar que se están recuperando productos
+        print(f"Se encontraron {len(productos)} productos inactivos")
+        for p in productos:
+            print(f"ID: {p.id_producto}, Nombre: {p.nombre}, Activo: {p.activo}")
+            
+        return productos
+    except Exception as e:
+        print(f"Error al obtener productos inactivos: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+@router.post("/productos/{producto_id}/restore", response_model=ProductoResponse)
+def restore_producto(
+    producto_id: int, 
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(check_functionality("Inventario"))
+):
+    """Restaurar un producto eliminado lógicamente"""
+    producto = db.query(Producto).filter(Producto.id_producto == producto_id).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    producto.activo = True
+    db.commit()
+    db.refresh(producto)
+    return producto

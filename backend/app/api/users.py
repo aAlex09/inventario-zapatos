@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from app.database import SessionLocal
 from app.models import Usuario, Rol
@@ -113,3 +113,8 @@ def delete_user(cedula: str, db: Session = Depends(get_db)):
 def get_roles(db: Session = Depends(get_db)):
     roles = db.query(Rol).all()
     return roles
+
+@router.get("/usuarios", response_model=List[UserResponse])
+def get_usuarios(db: Session = Depends(get_db)):
+    usuarios = db.query(Usuario).options(joinedload(Usuario.rol)).all()
+    return usuarios

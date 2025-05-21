@@ -159,3 +159,85 @@ export const deleteProducto = async (id) => {
     handleAuthError(error);
   }
 };
+
+export const getInactiveProducts = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
+    
+    console.log('Intentando obtener productos inactivos...');
+    
+    // Intentar primero con la URL principal
+    try {
+      const response = await axios.get(`${API_URL}/productos/inactivos`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Productos inactivos recibidos:', response.data);
+      return response.data;
+    } catch (initialError) {
+      console.error('Error con URL principal:', initialError);
+      
+      // Si hay error 422 (validación), intentar obtener los productos usando un filtro alternativo
+      if (initialError.response && initialError.response.status === 422) {
+        try {
+          console.log('Intentando obtener productos inactivos con método alternativo...');
+          const response = await axios.get(`${API_URL}/productos?activo=false`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          console.log('Productos inactivos obtenidos mediante filtro:', response.data);
+          return response.data;
+        } catch (filterError) {
+          console.error('Error con método alternativo:', filterError);
+        }
+      }
+      
+      // Si todo lo anterior falla, intentar con URL relativa
+      try {
+        console.log('Intentando con URL relativa...');
+        const response = await axios.get('/api/productos/inactivos', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('Productos inactivos recibidos (URL relativa):', response.data);
+        return response.data;
+      } catch (relError) {
+        console.error('Error con URL relativa:', relError);
+        return []; // Devolver array vacío como último recurso
+      }
+    }
+  } catch (error) {
+    console.error("Error general al obtener productos inactivos:", error);
+    return []; // Devolver array vacío para no romper la UI
+  }
+};
+
+export const restoreProduct = async (id) => {
+  try {
+    try {
+      // Intentar primero con el endpoint específico de restauración
+      const response = await axios.post(
+        `${API_URL}/productos/${id}/restore`,
+        {},
+        getConfig()
+      );
+      console.log("Producto restaurado correctamente:", response.data);
+      return response.data;
+    } catch (restoreError) {
+      console.error("Error con endpoint de restauración, intentando actualizar directamente:", restoreError);
+      
+      // Si falla, intentar con una actualización directa
+      const response = await axios.put(
+        `${API_URL}/productos/${id}`,
+        { activo: true },
+        getConfig()
+      );
+      console.log("Producto restaurado mediante actualización:", response.data);
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error al restaurar producto:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

@@ -5,9 +5,10 @@ import Dashboard from "./pages/Dashboard";
 import UsersPage from "./pages/UsersPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import InventarioPage from "./pages/Inventario"; // Add this import
+import InventarioPage from "./pages/Inventario";
 import BodegaPage from "./pages/Bodega";
 import MovimientosPage from "./pages/Movimientos";
+import Reportes from "./pages/Reportes"; // Agregar esta importación
 import PrivateRoute from "./routes/PrivateRoute";
 import { setupAutoLogout } from "./utils/sessionManager";
 
@@ -52,6 +53,12 @@ function App() {
         <Route path="/movimientos" element={
           <PrivateRoute>
             <MovimientosPage />
+          </PrivateRoute>
+        } />
+        {/* Añadir la ruta para Reportes */}
+        <Route path="/reports" element={
+          <PrivateRoute>
+            <Reportes />
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />

@@ -24,7 +24,7 @@ const Dashboard = () => {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  // Mapeo de funcionalidades a rutas y nombres para la navegación
+  // Mapeo actualizado con 10 funcionalidades
   const functionalityRouteMap = {
     "Usuarios": { route: "/users", icon: "👥", color: "blue" },
     "Inventario": { route: "/inventario", icon: "📦", color: "green" },
@@ -32,11 +32,13 @@ const Dashboard = () => {
     "Movimientos": { route: "/movimientos", icon: "🔄", color: "orange" },
     "Ventas": { route: "/sales", icon: "💰", color: "red" },
     "Reportes": { route: "/reports", icon: "📊", color: "teal" },
-    "Configuración": { route: "/settings", icon: "⚙️", color: "gray" }
+    "Configuracion": { route: "/settings", icon: "⚙️", color: "gray" },
+    "Clientes": { route: "/clients", icon: "🧑‍🤝‍🧑", color: "pink" },
+    "Proveedores": { route: "/suppliers", icon: "🏭", color: "indigo" },
+    "Facturacion": { route: "/billing", icon: "🧾", color: "cyan" }
   };
 
   useEffect(() => {
-    // Verificar autenticación al cargar
     const token = localStorage.getItem('token');
     const cedula = localStorage.getItem('userCedula');
     
@@ -48,19 +50,20 @@ const Dashboard = () => {
     try {
       const decodedToken = jwtDecode(token);
       
-      // Verificar expiración del token
       if (decodedToken.exp * 1000 < Date.now()) {
         handleLogout();
         return;
       }
       
-      // Asegurarse de que los campos estén correctamente mapeados
+      // Obtener el rol del usuario
+      const rolName = decodedToken.rol || 'Usuario';
+      
       setUserData({
         ...decodedToken,
-        cedula: decodedToken.cedula || cedula,
+        cedula: cedula || decodedToken.cedula,
         nombre: decodedToken.nombre || decodedToken.sub,
-        tipo_usuario: decodedToken.rol_nombre || 'Usuario', // Cambiado para usar rol_nombre
-        email: decodedToken.email || decodedToken.sub
+        tipo_usuario: decodedToken.role,
+        email: decodedToken.email
       });
 
       // Cargar las funcionalidades del usuario
@@ -114,7 +117,7 @@ const Dashboard = () => {
   // Función de navegación segura
   const handleNavigation = useCallback((path) => {
     // Lista de rutas implementadas
-    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos'];
+    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos', '/reports'];
     
     if (!implementedRoutes.includes(path)) {
       setShowWorkingModal(true);
@@ -182,10 +185,7 @@ const Dashboard = () => {
               <span className="detail-label">Cédula:</span> 
               {userData.cedula}
             </p>
-            <p>
-              <span className="detail-label">Rol:</span> 
-              {userData.tipo_usuario || 'Usuario'}
-            </p>
+              
             <p>
               <span className="detail-label">Correo:</span> 
               {userData.email || userData.sub}

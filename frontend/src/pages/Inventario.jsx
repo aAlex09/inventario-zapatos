@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProductos, createProducto, updateProducto, deleteProducto } from '../api/inventario';
+import { getProductos, createProducto, updateProducto, deleteProducto, getInactiveProducts, restoreProduct } from '../api/inventario';
 import Navbar from '../components/Navbar';
 import '../styles/inventario.css';
 
@@ -47,10 +47,55 @@ const InventarioPage = ({ userData }) => {
   // Agrega un estado para la vista previa de la imagen
   const [imagePreview, setImagePreview] = useState(null);
 
+  // Estado para productos inactivos
+  const [showInactiveProducts, setShowInactiveProducts] = useState(false);
+  const [inactiveProducts, setInactiveProducts] = useState([]);
+  const [loadingInactive, setLoadingInactive] = useState(false);
+
   // Fetch products when component mounts
   useEffect(() => {
     fetchProductos();
   }, []);
+
+  useEffect(() => {
+    if (showInactiveProducts) {
+      const fetchInactive = async () => {
+        try {
+          setLoadingInactive(true);
+          setError(''); // Limpiar errores anteriores
+          
+          console.log('Iniciando carga de productos inactivos');
+          const data = await getInactiveProducts();
+          
+          if (Array.isArray(data)) {
+            console.log(`Recibidos ${data.length} productos inactivos`);
+            setInactiveProducts(data);
+            
+            // Si no hay productos inactivos, mostrar un mensaje informativo
+            if (data.length === 0) {
+              console.log('No hay productos inactivos para mostrar');
+            }
+          } else {
+            console.error('Datos de productos inactivos no son un array:', data);
+            setInactiveProducts([]);
+            setError('Formato de datos incorrecto para productos inactivos');
+          }
+        } catch (err) {
+          console.error("Error al cargar productos inactivos:", err);
+          setInactiveProducts([]);
+          setError(`Error al cargar productos eliminados: ${err.message}`);
+        } finally {
+          setLoadingInactive(false);
+        }
+      };
+      
+      fetchInactive();
+    } else {
+      // Limpiar productos inactivos cuando cambiamos a productos activos
+      setInactiveProducts([]);
+      setError('');
+    }
+  }, [showInactiveProducts]);
 
   const fetchProductos = async () => {
     try {
@@ -287,6 +332,30 @@ const InventarioPage = ({ userData }) => {
     }
   };
 
+  const handleRestoreProduct = async (productId) => {
+    try {
+      setLoading(true);
+      await restoreProduct(productId);
+      
+      // Actualizar ambas listas
+      setInactiveProducts(prev => prev.filter(p => p.id_producto !== productId));
+      
+      // Dar tiempo para que la actualización se complete en el servidor
+      setTimeout(() => {
+        fetchProductos();
+      }, 300);
+      
+      setSuccess("Producto restaurado exitosamente");
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error("Error al restaurar producto:", err);
+      setError("Error al restaurar el producto: " + (err.response?.data?.detail || err.message));
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Close any modal
   const closeModal = () => {
     setShowCreateModal(false);
@@ -391,132 +460,212 @@ const InventarioPage = ({ userData }) => {
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
         
-        {/* Filters Section */}
-        <div className="filters-section">
-          <h3>Filtros</h3>
-          <form onSubmit={applyFilters} className="filters-form">
-            <div className="filters-row">
-              <div className="filter-group">
-                <label>Código</label>
-                <input 
-                  type="text" 
-                  name="codigo" 
-                  value={filters.codigo}
-                  onChange={handleFilterChange}
-                />
-              </div>
-              <div className="filter-group">
-                <label>Nombre</label>
-                <input 
-                  type="text" 
-                  name="nombre" 
-                  value={filters.nombre}
-                  onChange={handleFilterChange}
-                />
-              </div>
-              <div className="filter-group">
-                <label>Talla</label>
-                <input 
-                  type="text" 
-                  name="talla" 
-                  value={filters.talla}
-                  onChange={handleFilterChange}
-                />
-              </div>
-              <div className="filter-group">
-                <label>Marca</label>
-                <input 
-                  type="text" 
-                  name="marca" 
-                  value={filters.marca}
-                  onChange={handleFilterChange}
-                />
-              </div>
-              <div className="filter-group">
-                <label>Categoría</label>
-                <input 
-                  type="text" 
-                  name="categoria" 
-                  value={filters.categoria}
-                  onChange={handleFilterChange}
-                />
-              </div>
-            </div>
-            <div className="filters-buttons">
-              <button type="submit" className="btn-apply">Aplicar Filtros</button>
-              <button type="button" className="btn-reset" onClick={resetFilters}>Reset</button>
-            </div>
-          </form>
+        <div className="inventory-actions">
+          <button 
+            className="btn-secondary"
+            onClick={() => setShowInactiveProducts(!showInactiveProducts)}
+          >
+            <span className="button-icon">{showInactiveProducts ? "📋" : "🗑️"}</span>
+            {showInactiveProducts ? "Ver Productos Activos" : "Ver Productos Eliminados"}
+          </button>
         </div>
-        
-        {/* Products Table */}
-        <div className="products-table-container">
-          <table className="products-table">
-            <thead>
-              <tr>
-                <th>Imagen</th>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Talla</th>
-                <th>Marca</th>
-                <th>Categoría</th>
-                <th>Precio Compra</th>
-                <th>Precio Venta</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="no-data">No hay productos para mostrar</td>
-                </tr>
-              ) : (
-                productos.map(producto => (
-                  <tr key={producto.id_producto}>
-                    <td className="image-cell">
-                      {producto.imagen_url ? (
-                        <img 
-                          src={producto.imagen_url} 
-                          alt={producto.nombre} 
-                          className="product-image"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/80?text=Error";
-                          }}
-                        />
-                      ) : (
-                        <div className="no-image">📷</div>
-                      )}
-                    </td>
-                    <td>{producto.codigo}</td>
-                    <td>{producto.nombre}</td>
-                    <td>{producto.talla}</td>
-                    <td>{producto.marca}</td>
-                    <td>{producto.categoria}</td>
-                    <td>{formatCOP(producto.precio_compra)}</td>
-                    <td>{formatCOP(producto.precio_venta)}</td>
-                    <td>{producto.stock}</td>
-                    <td className="action-buttons">
-                      <button 
-                        className="btn-edit"
-                        onClick={() => handleEditClick(producto)}
-                      >
-                        Editar
-                      </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteClick(producto)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
+
+        {showInactiveProducts ? (
+          <div className="inactive-products-container">
+            <h3 className="section-title">Productos Eliminados</h3>
+            
+            {loadingInactive ? (
+              <div className="loading">Cargando productos eliminados...</div>
+            ) : inactiveProducts.length === 0 ? (
+              <div className="no-data-container">
+                <div className="no-data-icon">🔎</div>
+                <p className="no-data-message">No hay productos eliminados para mostrar</p>
+              </div>
+            ) : (
+              <div className="products-table-container">
+                <table className="products-table inactive-table">
+                  <thead>
+                    <tr>
+                      <th>Imagen</th>
+                      <th>Código</th>
+                      <th>Nombre</th>
+                      <th>Descripción</th>
+                      <th>Talla</th>
+                      <th>Marca</th>
+                      <th>Precio</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inactiveProducts.map(product => (
+                      <tr key={product.id_producto}>
+                        <td className="image-cell">
+                          {product.imagen_url ? (
+                            <img 
+                              src={product.imagen_url} 
+                              alt={product.nombre} 
+                              className="product-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/80?text=No+Imagen";
+                              }}
+                            />
+                          ) : (
+                            <div className="no-image">📷</div>
+                          )}
+                        </td>
+                        <td>{product.codigo}</td>
+                        <td>{product.nombre}</td>
+                        <td>{product.descripcion || 'N/A'}</td>
+                        <td>{product.talla}</td>
+                        <td>{product.marca}</td>
+                        <td>{formatCOP(product.precio_venta)}</td>
+                        <td>
+                          <button 
+                            className="btn-restore"
+                            onClick={() => handleRestoreProduct(product.id_producto)}
+                            disabled={loading}
+                          >
+                            {loading ? 'Restaurando...' : 'Restaurar'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="active-products">
+            {/* Filters Section */}
+            <div className="filters-section">
+              <h3>Filtros</h3>
+              <form onSubmit={applyFilters} className="filters-form">
+                <div className="filters-row">
+                  <div className="filter-group">
+                    <label>Código</label>
+                    <input 
+                      type="text" 
+                      name="codigo" 
+                      value={filters.codigo}
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>Nombre</label>
+                    <input 
+                      type="text" 
+                      name="nombre" 
+                      value={filters.nombre}
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>Talla</label>
+                    <input 
+                      type="text" 
+                      name="talla" 
+                      value={filters.talla}
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>Marca</label>
+                    <input 
+                      type="text" 
+                      name="marca" 
+                      value={filters.marca}
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>Categoría</label>
+                    <input 
+                      type="text" 
+                      name="categoria" 
+                      value={filters.categoria}
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+                <div className="filters-buttons">
+                  <button type="submit" className="btn-apply">Aplicar Filtros</button>
+                  <button type="button" className="btn-reset" onClick={resetFilters}>Reset</button>
+                </div>
+              </form>
+            </div>
+            
+            {/* Products Table */}
+            <div className="products-table-container">
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>Imagen</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Talla</th>
+                    <th>Marca</th>
+                    <th>Categoría</th>
+                    <th>Precio Compra</th>
+                    <th>Precio Venta</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {productos.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="no-data">No hay productos para mostrar</td>
+                    </tr>
+                  ) : (
+                    productos.map(producto => (
+                      <tr key={producto.id_producto}>
+                        <td className="image-cell">
+                          {producto.imagen_url ? (
+                            <img 
+                              src={producto.imagen_url} 
+                              alt={producto.nombre} 
+                              className="product-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/80?text=Error";
+                              }}
+                            />
+                          ) : (
+                            <div className="no-image">📷</div>
+                          )}
+                        </td>
+                        <td>{producto.codigo}</td>
+                        <td>{producto.nombre}</td>
+                        <td>{producto.talla}</td>
+                        <td>{producto.marca}</td>
+                        <td>{producto.categoria}</td>
+                        <td>{formatCOP(producto.precio_compra)}</td>
+                        <td>{formatCOP(producto.precio_venta)}</td>
+                        <td>{producto.stock}</td>
+                        <td className="action-buttons">
+                          <button 
+                            className="btn-edit"
+                            onClick={() => handleEditClick(producto)}
+                          >
+                            Editar
+                          </button>
+                          <button 
+                            className="btn-delete"
+                            onClick={() => handleDeleteClick(producto)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Create Product Modal */}
