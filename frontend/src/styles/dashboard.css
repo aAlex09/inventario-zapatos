@@ -403,6 +403,22 @@
   box-shadow: inset 0 0 15px rgba(93, 109, 126, 0.3), var(--card-shadow);
 }
 
+/* Colores para las nuevas funcionalidades */
+.pink {
+  background: linear-gradient(135deg, #e91e63, #ad1457);
+  box-shadow: inset 0 0 15px rgba(233, 30, 99, 0.3), var(--card-shadow);
+}
+
+.indigo {
+  background: linear-gradient(135deg, #3f51b5, #283593);
+  box-shadow: inset 0 0 15px rgba(63, 81, 181, 0.3), var(--card-shadow);
+}
+
+.cyan {
+  background: linear-gradient(135deg, #00bcd4, #00838f);
+  box-shadow: inset 0 0 15px rgba(0, 188, 212, 0.3), var(--card-shadow);
+}
+
 /* Mejora el efecto cuando una tarjeta está activa */
 .functionality-card.active {
   border: 2px solid rgba(255, 255, 255, 0.7);

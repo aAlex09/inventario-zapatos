@@ -583,3 +583,112 @@
 .products-table td:nth-child(8) {
   color: #a1f1ff;
 }
+
+/* Estilos para el botón de alternar vista */
+.inventory-actions {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #30475e, #222831);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #3b5b78, #2d3748);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.button-icon {
+  font-size: 1.1em;
+  margin-right: 8px;
+}
+
+/* Estilos para la tabla de productos inactivos */
+.inactive-products-container {
+  margin-top: 1.5rem;
+}
+
+.section-title {
+  color: #e3e3e3;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-left: 15px;
+  border-left: 5px solid #f44336;
+}
+
+.inactive-table {
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.1);
+}
+
+.inactive-table thead th {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f5f5f5;
+}
+
+.btn-restore {
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-restore:before {
+  content: "↩️";
+  font-size: 1.1em;
+}
+
+.btn-restore:hover {
+  background: linear-gradient(135deg, #66BB6A, #43A047);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-restore:disabled {
+  background: linear-gradient(135deg, #90A4AE, #78909C);
+  cursor: not-allowed;
+}
+
+/* Estilos para estado vacío */
+.no-data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background-color: #1a2130;
+  border-radius: 8px;
+  border: 1px dashed rgba(244, 67, 54, 0.3);
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.no-data-message {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+}

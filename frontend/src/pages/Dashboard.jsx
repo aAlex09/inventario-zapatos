@@ -24,7 +24,7 @@ const Dashboard = () => {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  // Mapeo de funcionalidades a rutas y nombres para la navegación
+  // Mapeo actualizado con 10 funcionalidades
   const functionalityRouteMap = {
     "Usuarios": { route: "/users", icon: "👥", color: "blue" },
     "Inventario": { route: "/inventario", icon: "📦", color: "green" },
@@ -32,7 +32,10 @@ const Dashboard = () => {
     "Movimientos": { route: "/movimientos", icon: "🔄", color: "orange" },
     "Ventas": { route: "/sales", icon: "💰", color: "red" },
     "Reportes": { route: "/reports", icon: "📊", color: "teal" },
-    "Configuracion": { route: "/settings", icon: "⚙️", color: "gray" }
+    "Configuracion": { route: "/settings", icon: "⚙️", color: "gray" },
+    "Clientes": { route: "/clients", icon: "🧑‍🤝‍🧑", color: "pink" },
+    "Proveedores": { route: "/suppliers", icon: "🏭", color: "indigo" },
+    "Facturacion": { route: "/billing", icon: "🧾", color: "cyan" }
   };
 
   useEffect(() => {
