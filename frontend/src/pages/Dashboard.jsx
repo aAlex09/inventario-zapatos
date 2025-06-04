@@ -35,7 +35,7 @@ const Dashboard = () => {
     "Configuracion": { route: "/settings", icon: "⚙️", color: "gray" },
     "Clientes": { route: "/clients", icon: "🧑‍🤝‍🧑", color: "pink" },
     "Proveedores": { route: "/suppliers", icon: "🏭", color: "indigo" },
-    "Facturacion": { route: "/billing", icon: "🧾", color: "cyan" }
+    "Facturacion": { route: "/facturacion", icon: "🧾", color: "cyan" }
   };
 
   useEffect(() => {
@@ -117,7 +117,15 @@ const Dashboard = () => {
   // Función de navegación segura
   const handleNavigation = useCallback((path) => {
     // Lista de rutas implementadas
-    const implementedRoutes = ['/dashboard', '/users', '/inventario', '/bodega', '/movimientos', '/reports'];
+    const implementedRoutes = [
+      '/dashboard',
+      '/users',
+      '/inventario',
+      '/bodega',
+      '/movimientos',
+      '/reports',
+      '/facturacion'
+    ];
     
     if (!implementedRoutes.includes(path)) {
       setShowWorkingModal(true);

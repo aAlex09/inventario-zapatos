@@ -174,32 +174,47 @@
   gap: 0.8rem;
   margin-top: 1.5rem;
   background: linear-gradient(145deg, #16213e 0%, #1a2b3c 100%);
-  padding: 1.2rem;
+  padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid rgba(103, 100, 255, 0.2);
   box-shadow: inset 0 0 15px rgba(103, 100, 255, 0.1);
+  overflow: hidden; /* Evita desbordamiento de texto largo */
 }
 
 .user-details p {
   margin: 0;
   color: #ffffff;
   display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-size: 1rem;
-  letter-spacing: 0.3px;
+  align-items: flex-start; /* Alinea al inicio para mejor control */
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es muy largo */
+  word-break: break-word; /* Permite romper palabras largas como emails */
 }
 
 .detail-label {
   color: #ffffff;
   font-weight: 600;
-  min-width: 70px;
+  min-width: 80px; /* Aumentado para dar más espacio */
   opacity: 0.9;
+  flex-shrink: 0; /* Evita que la etiqueta se encoja */
 }
 
-.user-details p:not(:last-child) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.8rem;
+/* Añadir scroll si hay demasiado contenido */
+@media (max-width: 768px) {
+  .user-details {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .user-details::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .user-details::-webkit-scrollbar-thumb {
+    background: rgba(103, 100, 255, 0.5);
+    border-radius: 4px;
+  }
 }
 
 @keyframes slideIn {

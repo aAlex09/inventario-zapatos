@@ -11,6 +11,7 @@ import MovimientosPage from "./pages/Movimientos";
 import Reportes from "./pages/Reportes"; // Agregar esta importación
 import PrivateRoute from "./routes/PrivateRoute";
 import { setupAutoLogout } from "./utils/sessionManager";
+import FacturacionPage from "./pages/Facturacion";
 
 function App() { 
   // Set up auto logout on component mount
@@ -59,6 +60,11 @@ function App() {
         <Route path="/reports" element={
           <PrivateRoute>
             <Reportes />
+          </PrivateRoute>
+        } />
+        <Route path="/facturacion" element={
+          <PrivateRoute>
+            <FacturacionPage />
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />

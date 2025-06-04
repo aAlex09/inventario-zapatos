@@ -169,3 +169,240 @@
   padding-top: 10px;
   margin-top: 10px;
 }
+
+/* Mejorar el espaciado en las tablas */
+.factura-items table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 15px 0;
+}
+
+.factura-items th,
+.factura-items td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #30363d;
+  min-width: 100px; /* Ancho mínimo para columnas */
+}
+
+/* Alineación específica por columna */
+.factura-items th:nth-child(1),
+.factura-items td:nth-child(1) {
+  width: 40%; /* Columna Producto */
+}
+
+.factura-items th:nth-child(2),
+.factura-items td:nth-child(2) {
+  width: 15%; /* Columna Cantidad */
+  text-align: center;
+}
+
+.factura-items th:nth-child(3),
+.factura-items td:nth-child(3) {
+  width: 15%; /* Columna Precio Unitario */
+  text-align: right;
+}
+
+.factura-items th:nth-child(4),
+.factura-items td:nth-child(4) {
+  width: 15%; /* Columna Subtotal */
+  text-align: right;
+}
+
+.factura-items th:nth-child(5),
+.factura-items td:nth-child(5) {
+  width: 15%; /* Columna Acciones */
+  text-align: center;
+}
+
+/* Estilos para la sección de facturas */
+.facturas-section {
+  background-color: #222831;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #30363d;
+}
+
+.aviso-legal {
+  background-color: #2c3e50;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  border-left: 4px solid #f39c12;
+  font-size: 0.9rem;
+}
+
+.facturas-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 15px;
+}
+
+.facturas-table th, 
+.facturas-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #30363d;
+}
+
+.facturas-table th {
+  background-color: #0f1729;
+  color: #e3e3e3;
+  border-bottom: 2px solid #6764ff;
+}
+
+.facturas-table td.numeric {
+  text-align: right;
+  font-family: monospace;
+  font-size: 1.05rem;
+}
+
+.btn-view {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.estado-emitida {
+  background-color: #27ae60;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  display: inline-block;
+}
+
+.estado-anulada {
+  background-color: #e74c3c;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  display: inline-block;
+}
+
+/* Estilos para el modal de detalle de factura */
+.factura-detalle-contenido {
+  padding: 15px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.factura-info-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #30363d;
+}
+
+.recibo-aviso h3 {
+  color: #3498db;
+  margin: 0 0 5px 0;
+}
+
+.factura-numero {
+  text-align: right;
+}
+
+.factura-cliente-info {
+  background-color: #2c3e50;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+}
+
+.factura-cliente-info h4 {
+  margin-top: 0;
+  border-bottom: 1px solid #3e546a;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.factura-items-detalle table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 15px 0;
+}
+
+.factura-items-detalle th,
+.factura-items-detalle td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #30363d;
+}
+
+.factura-items-detalle th {
+  background-color: #0f1729;
+  color: #e3e3e3;
+}
+
+.factura-items-detalle td.numeric {
+  text-align: right;
+  font-family: monospace;
+  font-size: 1.05rem;
+}
+
+.factura-detalle-totals {
+  margin-left: auto;
+  width: 50%;
+  min-width: 300px;
+}
+
+.factura-footer {
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid #30363d;
+  font-size: 0.9rem;
+  color: #95a5a6;
+  text-align: center;
+}
+
+.btn-print {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+/* Media query para impresión */
+@media print {
+  .modal-backdrop {
+    position: absolute;
+    background: white;
+  }
+  
+  .modal {
+    position: relative;
+    box-shadow: none;
+    padding: 0;
+    color: black;
+    background: white;
+  }
+  
+  .modal-header, .form-buttons, .close-btn {
+    display: none;
+  }
+  
+  .factura-detalle-contenido {
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .factura-items-detalle th {
+    background-color: #f1f1f1;
+    color: black;
+  }
+}

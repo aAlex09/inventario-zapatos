@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from app.database import engine
 from app.models import Base
-from app.api import users, auth, funcionalidades, inventario, movimientos, reportes
+from app.api import users, auth, funcionalidades, inventario, movimientos, reportes, facturas, clientes
 
 app = FastAPI(title="Inventario API")
 
@@ -36,3 +36,5 @@ app.include_router(funcionalidades.router, prefix="/api", tags=["funcionalidades
 app.include_router(inventario.router, prefix="/api", tags=["inventario"])
 app.include_router(movimientos.router, prefix="/api", tags=["movimientos"])
 app.include_router(reportes.router, prefix="/api", tags=["reportes"])
+app.include_router(facturas.router, prefix="/api", tags=["facturas"])
+app.include_router(clientes.router, prefix="/api", tags=["clientes"])

@@ -30,6 +30,7 @@ class Usuario(Base):
     rol = relationship("Rol", back_populates="usuarios")
     funcionalidades = relationship("UsuarioFuncionalidad", back_populates="usuario")
     movimientos = relationship("MovimientoInventario", back_populates="usuario")
+    facturas = relationship("Factura", back_populates="usuario")  # Nueva relación con Factura
 
 
 # Tabla de Funcionalidades
@@ -74,8 +75,9 @@ class Producto(Base):
     fecha_ingreso = Column(DateTime, default=func.now())
     activo = Column(Boolean, default=True)
     
-    # Relación con Movimientos de Inventario
+    # Relaciones
     movimientos = relationship("MovimientoInventario", back_populates="producto")
+    detalles_factura = relationship("DetalleFactura", back_populates="producto")
 
 
 class MovimientoInventario(Base):
@@ -94,3 +96,67 @@ class MovimientoInventario(Base):
     # Relaciones
     producto = relationship("Producto", back_populates="movimientos")
     usuario = relationship("Usuario", back_populates="movimientos")
+
+
+class Factura(Base):
+    __tablename__ = "facturas"
+    id_factura = Column(Integer, primary_key=True, index=True)
+    id_cliente = Column(Integer, ForeignKey("clientes.id_cliente"))
+    numero_factura = Column(String, nullable=False, unique=True)
+    fecha = Column(DateTime)
+    subtotal = Column(Numeric(10, 2))
+    iva = Column(Numeric(10, 2))
+    total = Column(Numeric(10, 2))
+    estado = Column(String, default="EMITIDA")
+    usuario_cedula = Column(String, ForeignKey("usuarios.cedula"), nullable=False)
+    
+    # Relaciones
+    cliente = relationship("Cliente", back_populates="facturas")
+    detalles = relationship("DetalleFactura", back_populates="factura")
+    usuario = relationship("Usuario", back_populates="facturas")
+
+
+class DetalleFactura(Base):
+    __tablename__ = "detalle_factura"
+    id_detalle = Column(Integer, primary_key=True, index=True)
+    id_factura = Column(Integer, ForeignKey("facturas.id_factura"))  # Cambiado de factura_id a id_factura
+    producto_id = Column(Integer, ForeignKey("productos.id_producto"))
+    cantidad = Column(Integer)
+    precio_unitario = Column(Numeric(10, 2))
+    subtotal = Column(Numeric(10, 2))
+    
+    # Relaciones
+    factura = relationship("Factura", back_populates="detalles")
+    producto = relationship("Producto", back_populates="detalles_factura")
+
+
+class Cliente(Base):
+    __tablename__ = "clientes"
+    
+    id_cliente = Column(Integer, primary_key=True, index=True)
+    cedula_nit = Column(String, unique=True, index=True)
+    nombre = Column(String, nullable=False)
+    telefono = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    direccion = Column(String, nullable=True)
+    
+    # Relaciones
+    facturas = relationship("Factura", back_populates="cliente")
+
+
+class Movimiento(Base):
+    __tablename__ = "movimientos"
+
+    id_movimiento = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id_producto = Column(Integer, ForeignKey("productos.id_producto"))
+    tipo_movimiento = Column(String(20))  # 'ENTRADA' o 'SALIDA'
+    cantidad = Column(Integer)
+    precio_unitario = Column(Float)
+    usuario_cedula = Column(String(20), ForeignKey("usuarios.cedula"))
+    fecha_movimiento = Column(DateTime)
+    referencia = Column(String(100))  # Para identificar la factura o el motivo
+    notas = Column(Text, nullable=True)
+
+    # Relaciones
+    producto = relationship("Producto")
+    usuario = relationship("Usuario")

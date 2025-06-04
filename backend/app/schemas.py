@@ -141,3 +141,55 @@ class MovimientoResponse(MovimientoBase):
     fecha_movimiento: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)  # Actualizar a la nueva sintaxis
+
+# Factura schemas
+class DetalleFacturaCreate(BaseModel):
+    producto_id: int  # Cambiado de id_producto a producto_id
+    cantidad: int
+    precio_unitario: float
+    subtotal: float
+
+class FacturaCreate(BaseModel):
+    cliente_id: int
+    fecha: str
+    subtotal: float
+    iva: float
+    total: float
+    items: List[DetalleFacturaCreate]
+
+# Schema para respuesta de Factura
+class DetalleFacturaResponse(BaseModel):
+    id_detalle: int
+    id_factura: int
+    producto_id: int  # Cambiado de id_producto a producto_id para coincidir con el modelo
+    cantidad: int
+    precio_unitario: float
+    subtotal: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class FacturaResponse(BaseModel):
+    id_factura: int
+    id_cliente: int
+    numero_factura: str
+    fecha: datetime
+    subtotal: float
+    iva: float
+    total: float
+    estado: str
+    usuario_cedula: str
+    detalles: List[DetalleFacturaResponse] = []
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class ClienteBase(BaseModel):
+    cedula_nit: str
+    nombre: str
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    direccion: Optional[str] = None
+
+class ClienteResponse(ClienteBase):
+    id_cliente: int
+    
+    model_config = ConfigDict(from_attributes=True)
