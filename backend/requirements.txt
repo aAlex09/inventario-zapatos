@@ -20,3 +20,6 @@ python-multipart
 
 # Configuración
 python-dotenv
+
+# HTTP client for AI model requests
+httpx
